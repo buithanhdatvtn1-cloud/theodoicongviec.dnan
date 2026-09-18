@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ Thống Quản Lý Vận Hành - VNPT Nghệ An</title>
+    <title>Hệ Thống Quản Lý Vận Hành - VNPT</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome CDN -->
@@ -106,7 +106,7 @@
                         <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
                             <i class="fas fa-lock"></i>
                         </span>
-                        <input type="password" id="loginPass" required placeholder="Nhập mật khẩu..." value="" class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-vnpt focus:border-vnpt text-sm">
+                        <input type="password" id="loginPass" required placeholder="Nhập mật khẩu..." class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-vnpt focus:border-vnpt text-sm">
                     </div>
                 </div>
                 <button type="submit" class="w-full bg-vnpt hover:bg-vnpt-dark text-white font-semibold py-3 rounded-lg shadow-md transition duration-200 flex justify-center items-center gap-2">
@@ -135,12 +135,7 @@
                         </div>
                         <div>
                             <h1 class="font-bold text-lg leading-tight tracking-wide">VNPT NET1-ĐÀI VIỄN THÔNG NGHỆ AN</h1>
-                            <div class="flex items-center gap-2">
-                                <p class="text-[10px] text-blue-200 uppercase tracking-widest">Trung Tâm Vận Hành Kỹ Thuật</p>
-                                <span class="bg-emerald-500 text-[9px] px-1.5 py-0.5 rounded-full font-bold flex items-center gap-1 animate-pulse">
-                                    <i class="fas fa-wifi text-[8px]"></i> REALTIME ONLINE
-                                </span>
-                            </div>
+                            <p class="text-[10px] text-blue-200 uppercase tracking-widest">Trung Tâm Vận Hành Kỹ Thuật</p>
                         </div>
                     </div>
 
@@ -149,7 +144,7 @@
                         <div class="bg-vnpt-dark/60 backdrop-blur rounded-lg p-1.5 flex items-center gap-2 border border-blue-400/30 text-xs">
                             <i class="far fa-calendar-alt text-blue-200 ml-1"></i>
                             <span class="text-blue-100 font-medium">Tuần:</span>
-                            <select id="globalWeekSelect" onchange="handleWeekSelectChange()" class="bg-white text-gray-800 font-semibold px-2 py-1 rounded border-none text-xs focus:ring-1 focus:ring-vnpt">
+                            <select id="globalWeekSelect" onchange="handleFilterChange()" class="bg-white text-gray-800 font-semibold px-2 py-1 rounded border-none text-xs focus:ring-1 focus:ring-vnpt">
                                 <option value="38">Tuần 38 (15/09 - 21/09/2026)</option>
                                 <option value="37">Tuần 37 (08/09 - 14/09/2026)</option>
                                 <option value="36">Tuần 36 (01/09 - 07/09/2026)</option>
@@ -305,11 +300,11 @@
                     </div>
                     <div class="bg-white p-4 rounded-xl shadow-sm border border-l-4 border-blue-500">
                         <h4 class="font-semibold text-xs text-gray-500 uppercase tracking-wider mb-2">Truyền Dẫn & CMIP</h4>
-                        <p class="text-xs text-gray-700 font-medium" id="dashTransText">Đang tải dữ liệu realtime...</p>
+                        <p class="text-xs text-gray-700 font-medium" id="dashTransText">Đang tải...</p>
                     </div>
                     <div class="bg-white p-4 rounded-xl shadow-sm border border-l-4 border-indigo-500">
                         <h4 class="font-semibold text-xs text-gray-500 uppercase tracking-wider mb-2">Hạ Tầng Điện & Điều Hòa</h4>
-                        <p class="text-xs text-gray-700 font-medium" id="dashPowerText">Đang tải dữ liệu realtime...</p>
+                        <p class="text-xs text-gray-700 font-medium" id="dashPowerText">Đang tải...</p>
                     </div>
                 </div>
             </section>
@@ -320,11 +315,11 @@
                     <div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b">
                         <div>
                             <h2 class="text-lg font-bold text-gray-800">Cập Nhật Công Việc & Sự Cố Trong Tuần</h2>
-                            <p class="text-xs text-gray-500">Nhập số liệu báo cáo kỹ thuật theo từng hạng mục chuyên môn (Đồng bộ trực tiếp)</p>
+                            <p class="text-xs text-gray-500">Nhập số liệu báo cáo kỹ thuật theo từng hạng mục chuyên môn</p>
                         </div>
                         <div class="flex items-center gap-2">
                             <label class="text-xs font-semibold text-gray-600">Chọn Lịch Tuần:</label>
-                            <input type="week" id="weekPicker" value="2026-W38" onchange="handleWeekPickerChange()" class="px-3 py-1.5 bg-gray-50 border border-gray-300 rounded-lg text-xs font-semibold focus:ring-vnpt">
+                            <input type="week" id="weekPicker" value="2026-W38" onchange="loadWeekData()" class="px-3 py-1.5 bg-gray-50 border border-gray-300 rounded-lg text-xs font-semibold focus:ring-vnpt">
                         </div>
                     </div>
 
@@ -386,7 +381,7 @@
 
                         <div class="col-span-1 md:col-span-2 lg:col-span-4 flex justify-end gap-2 mt-2">
                             <button onclick="saveCurrentWeekData()" class="bg-vnpt hover:bg-vnpt-dark text-white px-5 py-2 rounded-lg text-xs font-bold shadow flex items-center gap-2">
-                                <i class="fas fa-cloud-upload-alt"></i> Lưu Đồng Bộ Realtime
+                                <i class="fas fa-save"></i> Lưu Cập Nhật Tuần
                             </button>
                         </div>
                     </div>
@@ -444,7 +439,7 @@
                             </div>
                             <div>
                                 <button onclick="addNextWeekTask()" class="w-full bg-vnpt hover:bg-vnpt-dark text-white p-2.5 rounded-lg text-xs font-bold shadow flex items-center justify-center gap-2">
-                                    <i class="fas fa-plus-circle"></i> Thêm Nhiệm Vụ Realtime
+                                    <i class="fas fa-plus-circle"></i> Thêm Nhiệm Vụ
                                 </button>
                             </div>
                         </div>
@@ -494,7 +489,7 @@
                                     <th class="p-3 font-bold min-w-[180px]">Nội dung thực hiện trong tuần</th>
                                     <th class="p-3 font-bold">Tiến độ</th>
                                     <th class="p-3 font-bold">Ngày hoàn thành</th>
-                                    <th class="p-3 font-bold text-center">Thao tác</th>
+                                    <th class="p-3 font-bold text-center">Chỉnh sửa</th>
                                 </tr>
                             </thead>
                             <tbody id="docTableBody" class="divide-y divide-gray-100">
@@ -509,7 +504,7 @@
 
         <!-- FOOTER -->
         <footer class="bg-white border-t py-4 text-center text-xs text-gray-500">
-            <p>Hệ Thống Báo Cáo Điều Hành Kỹ Thuật - VNPT &copy; 2026. Phát triển tích hợp Firebase Cloud Realtime Sync.</p>
+            <p>Hệ Thống Báo Cáo Điều Hành Kỹ Thuật - VNPT &copy; 2026. Phát triển cho mục đích Quản Lý Vận Hành.</p>
         </footer>
     </div>
 
@@ -560,67 +555,17 @@
 
                 <div class="flex justify-end gap-2 pt-2 border-t">
                     <button type="button" onclick="closeDocModal()" class="px-4 py-2 border rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-50">Hủy</button>
-                    <button type="submit" class="px-5 py-2 bg-vnpt hover:bg-vnpt-dark text-white rounded-lg text-xs font-bold shadow">Lưu Thay Đổi Realtime</button>
+                    <button type="submit" class="px-5 py-2 bg-vnpt hover:bg-vnpt-dark text-white rounded-lg text-xs font-bold shadow">Lưu Thay Đổi</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Notification Toast Modal -->
-    <div id="toast" class="fixed bottom-5 right-5 bg-emerald-600 text-white px-4 py-3 rounded-xl shadow-xl flex items-center gap-3 transition-opacity duration-300 opacity-0 pointer-events-none z-50 text-xs font-semibold">
-        <i class="fas fa-check-circle text-lg"></i>
-        <span id="toastMsg">Thao tác thành công!</span>
-    </div>
+    <!-- JAVASCRIPT APP LOGIC WITH REAL-TIME CLOUD SYNC -->
+    <script>
+        // 🔗 ĐÃ CẬP NHẬT ĐƯỜNG DẪN GOOGLE APPS SCRIPT WEB APP
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxccyDnHvYshw2lW429ldXQLH8AVKnjmhcqF2MeKXWuCwQWz2IKl5pihA-b4-Dy4Cqz/exec'; 
 
-    <!-- FIREBASE MODULE & APPLICATION LOGIC -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot, collection, addDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // Environment Variables Injection
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'vnpt-nghean-app';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-            apiKey: "demo-key",
-            authDomain: "demo-app.firebaseapp.com",
-            projectId: "demo-app",
-            storageBucket: "demo-app.appspot.com",
-            messagingSenderId: "123456789",
-            appId: "1:123456789:web:demo"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        // Firestore Realtime Collections Paths
-        const publicPath = (collName) => collection(db, 'artifacts', appId, 'public', 'data', collName);
-        const docPath = (collName, id) => doc(db, 'artifacts', appId, 'public', 'data', collName, id);
-
-        // App Local Data Mirror
-        window.appState = {
-            currentWeek: {
-                generalInfo: "Duy trì ổn định hạ tầng mạng lưới phục vụ các sự kiện quan trọng. Tăng cường ứng trực 24/7.",
-                fiberCauses: {
-                    'Khách quan': 3,
-                    'Chủ quan': 1,
-                    'Chưa làm hết trách nhiệm': 0,
-                    'Thiên tai': 2,
-                    'Đã báo trước nguy cơ': 1,
-                    'Suy hao/Đứt sợi': 5
-                },
-                transCount: 5,
-                cmipCount: 3,
-                radioCount: 7,
-                acCount: 2,
-                powerCount: 4,
-                tvCount: 18
-            },
-            nextWeekTasks: [],
-            documents: []
-        };
-
-        // User Accounts
         const VALID_USERS = [
             'tvkhoa', 'nhmai', 'chiennv3', 'ndnguyen', 
             'nguyenvancuong1', 'phanthanhha1', 'ththanh', 
@@ -629,69 +574,62 @@
         const VALID_PASS = 'Adm@123';
 
         let currentUser = localStorage.getItem('vnpt_user') || null;
-        let selectedWeek = '38';
 
-        // Firebase Auth Initialization
-        async function authenticateUser() {
+        let db = {
+            currentWeek: {
+                generalInfo: "",
+                fiberCauses: { 'Khách quan': 0, 'Chủ quan': 0, 'Chưa làm hết trách nhiệm': 0, 'Thiên tai': 0, 'Đã báo trước nguy cơ': 0, 'Suy hao/Đứt sợi': 0 },
+                transCount: 0, cmipCount: 0, radioCount: 0, acCount: 0, powerCount: 0, tvCount: 0
+            },
+            nextWeekTasks: [],
+            documents: []
+        };
+
+        let fiberChartInstance = null;
+        let pieChartInstance = null;
+
+        // --- CÁC HÀM GỌI API ĐỒNG BỘ DATA REAL-TIME ---
+        
+        // 1. Tải dữ liệu từ Google Sheets
+        async function fetchCloudData() {
+            if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL.includes('AKfycb...')) return;
             try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
+                const res = await fetch(APPS_SCRIPT_URL);
+                const data = await res.json();
+                if (data) {
+                    db = data;
+                    updateDashboard();
+                    loadCurrentWeekToForm();
+                    renderFiberTable();
+                    renderNextWeekTasks();
+                    renderDocuments();
                 }
             } catch (err) {
-                console.warn("Auth initialization fallback:", err);
+                console.error("Lỗi đồng bộ dữ liệu từ đám mây:", err);
             }
         }
 
-        // Setup Firestore Realtime Listeners
-        function setupRealtimeListeners() {
-            // 1. Current Week Document Listener
-            onSnapshot(docPath('weekly_reports', 'week_' + selectedWeek), (docSnap) => {
-                if (docSnap.exists()) {
-                    window.appState.currentWeek = docSnap.data();
-                } else {
-                    // Seed initial data if document doesn't exist yet
-                    setDoc(docPath('weekly_reports', 'week_' + selectedWeek), window.appState.currentWeek);
-                }
-                loadCurrentWeekToForm();
-                renderFiberTable();
-                updateDashboard();
-            }, (err) => console.error("Realtime Error Week Report:", err));
+        // 2. Tự động làm mới dữ liệu mỗi 8 giây (Giúp nhiều máy/điện thoại thấy thay đổi cùng lúc)
+        setInterval(fetchCloudData, 8000);
 
-            // 2. Next Week Tasks Collection Listener
-            onSnapshot(publicPath('next_week_tasks'), (snapshot) => {
-                const tasks = [];
-                snapshot.forEach(doc => {
-                    tasks.push({ id: doc.id, ...doc.data() });
+        // 3. Gửi dữ liệu cập nhật lên Đám mây
+        async function postCloudData(action, payload) {
+            try {
+                await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors', // Cần thiết đối với Google Apps Script POST
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action, payload })
                 });
-                window.appState.nextWeekTasks = tasks;
-                renderNextWeekTasks();
-            }, (err) => console.error("Realtime Error Next Tasks:", err));
-
-            // 3. Documents Collection Listener
-            onSnapshot(publicPath('documents'), (snapshot) => {
-                const docs = [];
-                snapshot.forEach(doc => {
-                    docs.push({ id: doc.id, ...doc.data() });
-                });
-                window.appState.documents = docs;
-                renderDocuments();
-            }, (err) => console.error("Realtime Error Docs:", err));
+                // Tải lại dữ liệu sau 1 giây để cập nhật chính xác
+                setTimeout(fetchCloudData, 1000);
+            } catch (err) {
+                console.error("Lỗi khi gửi dữ liệu:", err);
+            }
         }
 
-        // Toast Helper
-        window.showToast = function(msg) {
-            const toast = document.getElementById('toast');
-            document.getElementById('toastMsg').textContent = msg;
-            toast.classList.remove('opacity-0', 'pointer-events-none');
-            setTimeout(() => {
-                toast.classList.add('opacity-0', 'pointer-events-none');
-            }, 2500);
-        };
-
-        // --- AUTHENTICATION EVENTS ---
-        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+        // --- AUTHENTICATION ---
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const user = document.getElementById('loginUser').value;
             const pass = document.getElementById('loginPass').value;
@@ -700,42 +638,262 @@
                 currentUser = user;
                 localStorage.setItem('vnpt_user', user);
                 document.getElementById('loginError').classList.add('hidden');
-                await initApp();
-                showToast('Đăng nhập thành công!');
+                initApp();
             } else {
                 document.getElementById('loginError').classList.remove('hidden');
             }
         });
 
-        window.logout = function() {
+        function logout() {
             localStorage.removeItem('vnpt_user');
             currentUser = null;
             document.getElementById('appContainer').classList.add('hidden');
             document.getElementById('loginModal').classList.remove('hidden');
             document.getElementById('loginPass').value = '';
-        };
-
-        // --- APP INIT ---
-        async function initApp() {
-            await authenticateUser();
-            document.getElementById('loginModal').classList.add('hidden');
-            document.getElementById('appContainer').classList.remove('hidden');
-            document.getElementById('currentUsername').textContent = currentUser;
-            document.getElementById('userAvatar').textContent = currentUser.charAt(0).toUpperCase();
-
-            initCharts();
-            setupRealtimeListeners();
         }
 
+        // --- INITIALIZATION ---
         window.addEventListener('DOMContentLoaded', () => {
             if (currentUser && VALID_USERS.includes(currentUser)) {
                 initApp();
             }
         });
 
-        let fiberChartInstance = null;
-        let pieChartInstance = null;
+        function initApp() {
+            document.getElementById('loginModal').classList.add('hidden');
+            document.getElementById('appContainer').classList.remove('hidden');
+            document.getElementById('currentUsername').textContent = currentUser;
+            document.getElementById('userAvatar').textContent = currentUser.charAt(0).toUpperCase();
 
+            initCharts();
+            fetchCloudData(); // Đọc dữ liệu từ Google Sheets ngay khi đăng nhập
+        }
+
+        // --- NAVIGATION ---
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(el => {
+                el.classList.remove('active-tab', 'border-white', 'text-white');
+                el.classList.add('border-transparent', 'text-blue-200');
+            });
+
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            const activeNav = document.getElementById(`nav-${tabId}`);
+            activeNav.classList.add('active-tab', 'border-white', 'text-white');
+            activeNav.classList.remove('border-transparent', 'text-blue-200');
+
+            if (tabId === 'dashboard') {
+                updateDashboard();
+            }
+        }
+
+        // --- TAB 2: CURRENT WEEK LOGIC ---
+        function loadCurrentWeekToForm() {
+            document.getElementById('generalWeekInfo').value = db.currentWeek.generalInfo || '';
+            document.getElementById('transCount').value = db.currentWeek.transCount || 0;
+            document.getElementById('cmipCount').value = db.currentWeek.cmipCount || 0;
+            document.getElementById('radioCount').value = db.currentWeek.radioCount || 0;
+            document.getElementById('acCount').value = db.currentWeek.acCount || 0;
+            document.getElementById('powerCount').value = db.currentWeek.powerCount || 0;
+            document.getElementById('tvCount').value = db.currentWeek.tvCount || 0;
+        }
+
+        async function saveCurrentWeekData() {
+            db.currentWeek.generalInfo = document.getElementById('generalWeekInfo').value;
+            
+            const cause = document.getElementById('fiberCauseSelect').value;
+            const count = parseInt(document.getElementById('fiberCount').value) || 0;
+            if (count > 0) {
+                db.currentWeek.fiberCauses[cause] = (db.currentWeek.fiberCauses[cause] || 0) + count;
+                document.getElementById('fiberCount').value = '';
+            }
+
+            db.currentWeek.transCount = parseInt(document.getElementById('transCount').value) || 0;
+            db.currentWeek.cmipCount = parseInt(document.getElementById('cmipCount').value) || 0;
+            db.currentWeek.radioCount = parseInt(document.getElementById('radioCount').value) || 0;
+            db.currentWeek.acCount = parseInt(document.getElementById('acCount').value) || 0;
+            db.currentWeek.powerCount = parseInt(document.getElementById('powerCount').value) || 0;
+            db.currentWeek.tvCount = parseInt(document.getElementById('tvCount').value) || 0;
+
+            renderFiberTable();
+            updateDashboard();
+
+            // Lưu dữ liệu lên Đám mây Google Sheets
+            await postCloudData('saveCurrentWeek', db.currentWeek);
+            alert('Đã đồng bộ cập nhật lên Đám Mây hệ thống!');
+        }
+
+        function renderFiberTable() {
+            const tbody = document.getElementById('fiberTableBody');
+            tbody.innerHTML = '';
+
+            if (!db.currentWeek.fiberCauses) return;
+
+            Object.entries(db.currentWeek.fiberCauses).forEach(([cause, count]) => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50';
+                tr.innerHTML = `
+                    <td class="p-3 font-medium text-gray-800">${cause}</td>
+                    <td class="p-3 text-center"><span class="px-2 py-0.5 rounded-full text-xs font-bold ${count > 0 ? 'bg-amber-100 text-amber-800' : 'bg-gray-100 text-gray-500'}">${count}</span></td>
+                    <td class="p-3 text-gray-500">${count > 0 ? 'Cần theo dõi & xử lý dứt điểm' : 'Thường xuyên rà soát'}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function loadWeekData() {
+            fetchCloudData();
+        }
+
+        // --- TAB 3: NEXT WEEK LOGIC ---
+        async function addNextWeekTask() {
+            const content = document.getElementById('nextTaskContent').value.trim();
+            const priority = document.getElementById('nextTaskPriority').value;
+            if (!content) {
+                alert('Vui lòng nhập nội dung công việc!');
+                return;
+            }
+
+            const newTask = {
+                id: Date.now(),
+                content: content,
+                priority: priority,
+                owner: currentUser
+            };
+
+            db.nextWeekTasks.push(newTask);
+            document.getElementById('nextTaskContent').value = '';
+            renderNextWeekTasks();
+
+            // Đồng bộ lên Google Sheets
+            await postCloudData('addNextTask', newTask);
+        }
+
+        async function deleteNextTask(id) {
+            db.nextWeekTasks = db.nextWeekTasks.filter(t => t.id !== id);
+            renderNextWeekTasks();
+
+            // Xóa trên Google Sheets
+            await postCloudData('deleteNextTask', { id: id });
+        }
+
+        function renderNextWeekTasks() {
+            const tbody = document.getElementById('nextWeekTableBody');
+            tbody.innerHTML = '';
+
+            if (!db.nextWeekTasks || db.nextWeekTasks.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-400">Chưa có công việc dự kiến nào.</td></tr>`;
+                return;
+            }
+
+            db.nextWeekTasks.forEach((task, index) => {
+                let badgeClass = 'bg-blue-100 text-blue-800';
+                if (task.priority === 'Cao') badgeClass = 'bg-amber-100 text-amber-800';
+                if (task.priority === 'Khẩn cấp') badgeClass = 'bg-red-100 text-red-800';
+
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50';
+                tr.innerHTML = `
+                    <td class="p-3 text-center font-bold text-gray-400">${index + 1}</td>
+                    <td class="p-3 font-medium text-gray-800">${task.content}</td>
+                    <td class="p-3"><span class="px-2.5 py-1 rounded-full text-[10px] font-bold ${badgeClass}">${task.priority}</span></td>
+                    <td class="p-3 text-gray-600 font-semibold">${task.owner}</td>
+                    <td class="p-3 text-center">
+                        <button onclick="deleteNextTask(${task.id})" class="text-red-500 hover:text-red-700 p-1"><i class="fas fa-trash"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // --- TAB 4: DOCUMENTS LOGIC ---
+        function renderDocuments() {
+            const tbody = document.getElementById('docTableBody');
+            tbody.innerHTML = '';
+
+            if (!db.documents) return;
+
+            db.documents.forEach(doc => {
+                let statusBadge = 'bg-blue-100 text-blue-800';
+                if (doc.status === 'Đã hoàn thành') statusBadge = 'bg-emerald-100 text-emerald-800';
+                if (doc.status === 'Chưa hoàn thành') statusBadge = 'bg-red-100 text-red-800';
+
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50';
+                tr.innerHTML = `
+                    <td class="p-3 font-bold text-vnpt">${doc.num}</td>
+                    <td class="p-3 font-medium text-gray-800">${doc.content}</td>
+                    <td class="p-3 text-gray-600">${doc.deadline}</td>
+                    <td class="p-3 text-gray-600">${doc.weeklyProgress || '-'}</td>
+                    <td class="p-3"><span class="px-2.5 py-1 rounded-full text-[10px] font-bold ${statusBadge}">${doc.status}</span></td>
+                    <td class="p-3 text-gray-600">${doc.finishDate || '-'}</td>
+                    <td class="p-3 text-center">
+                        <button onclick="openDocModal(${doc.id})" class="bg-blue-50 text-vnpt hover:bg-vnpt hover:text-white px-2.5 py-1 rounded text-xs font-semibold transition">
+                            <i class="fas fa-edit"></i> Sửa
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function openDocModal(docId = null) {
+            const modal = document.getElementById('docModal');
+            const form = document.getElementById('docForm');
+            form.reset();
+
+            if (docId) {
+                const doc = db.documents.find(d => d.id == docId);
+                if (doc) {
+                    document.getElementById('docModalTitle').textContent = 'Chỉnh Sửa Văn Bản';
+                    document.getElementById('docId').value = doc.id;
+                    document.getElementById('docNum').value = doc.num;
+                    document.getElementById('docDeadline').value = doc.deadline;
+                    document.getElementById('docContent').value = doc.content;
+                    document.getElementById('docWeeklyProgress').value = doc.weeklyProgress;
+                    document.getElementById('docStatus').value = doc.status;
+                    document.getElementById('docFinishDate').value = doc.finishDate;
+                }
+            } else {
+                document.getElementById('docModalTitle').textContent = 'Thêm Văn Bản Mới';
+                document.getElementById('docId').value = '';
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeDocModal() {
+            document.getElementById('docModal').classList.add('hidden');
+        }
+
+        async function handleDocSubmit(e) {
+            e.preventDefault();
+            const id = document.getElementById('docId').value || Date.now();
+            const docData = {
+                id: id,
+                num: document.getElementById('docNum').value,
+                deadline: document.getElementById('docDeadline').value,
+                content: document.getElementById('docContent').value,
+                weeklyProgress: document.getElementById('docWeeklyProgress').value,
+                status: document.getElementById('docStatus').value,
+                finishDate: document.getElementById('docFinishDate').value
+            };
+
+            const index = db.documents.findIndex(d => d.id == id);
+            if (index !== -1) {
+                db.documents[index] = docData;
+            } else {
+                db.documents.push(docData);
+            }
+
+            closeDocModal();
+            renderDocuments();
+
+            // Đồng bộ lên Cloud Google Sheets
+            await postCloudData('saveDocument', docData);
+        }
+
+        // --- DASHBOARD & CHARTS ---
         function initCharts() {
             const fiberCtx = document.getElementById('fiberCausesChart').getContext('2d');
             fiberChartInstance = new Chart(fiberCtx, {
@@ -776,318 +934,81 @@
         }
 
         function updateDashboard() {
-            const currentWeek = window.appState.currentWeek || {};
-            const fiberCauses = currentWeek.fiberCauses || {};
-            const totalFiber = Object.values(fiberCauses).reduce((a, b) => Number(a) + Number(b), 0);
+            if (!db.currentWeek || !db.currentWeek.fiberCauses) return;
 
+            const totalFiber = Object.values(db.currentWeek.fiberCauses).reduce((a, b) => a + b, 0);
+            
             document.getElementById('dash-stat-fiber').textContent = totalFiber;
-            document.getElementById('dash-stat-trans').textContent = currentWeek.transCount || 0;
-            document.getElementById('dash-stat-cmip').textContent = currentWeek.cmipCount || 0;
-            document.getElementById('dash-stat-radio').textContent = currentWeek.radioCount || 0;
-            document.getElementById('dash-stat-ac').textContent = currentWeek.acCount || 0;
-            document.getElementById('dash-stat-power').textContent = currentWeek.powerCount || 0;
-            document.getElementById('dash-stat-tv').textContent = currentWeek.tvCount || 0;
+            document.getElementById('dash-stat-trans').textContent = db.currentWeek.transCount || 0;
+            document.getElementById('dash-stat-cmip').textContent = db.currentWeek.cmipCount || 0;
+            document.getElementById('dash-stat-radio').textContent = db.currentWeek.radioCount || 0;
+            document.getElementById('dash-stat-ac').textContent = db.currentWeek.acCount || 0;
+            document.getElementById('dash-stat-power').textContent = db.currentWeek.powerCount || 0;
+            document.getElementById('dash-stat-tv').textContent = db.currentWeek.tvCount || 0;
 
             const dashFiberList = document.getElementById('dashFiberList');
             dashFiberList.innerHTML = '';
-            Object.entries(fiberCauses).forEach(([cause, cnt]) => {
+            Object.entries(db.currentWeek.fiberCauses).forEach(([cause, cnt]) => {
                 dashFiberList.innerHTML += `<li class="flex justify-between items-center"><span>- ${cause}:</span> <strong class="text-gray-900">${cnt}</strong></li>`;
             });
 
-            document.getElementById('dashTransText').textContent = `Tổng cộng ${currentWeek.transCount || 0} sự cố Truyền dẫn & ${currentWeek.cmipCount || 0} sự cố thiết bị CMIP được xử lý trong tuần.`;
-            document.getElementById('dashPowerText').textContent = `Ghi nhận ${currentWeek.powerCount || 0} sự cố Nguồn điện và ${currentWeek.acCount || 0} sự cố Điều hòa nhiệt độ trạm.`;
+            document.getElementById('dashTransText').textContent = `Tổng cộng ${db.currentWeek.transCount || 0} sự cố Truyền dẫn & ${db.currentWeek.cmipCount || 0} sự cố thiết bị CMIP được xử lý trong tuần.`;
+            document.getElementById('dashPowerText').textContent = `Ghi nhận ${db.currentWeek.powerCount || 0} sự cố Nguồn điện và ${db.currentWeek.acCount || 0} sự cố Điều hòa nhiệt độ trạm.`;
 
             if (fiberChartInstance && pieChartInstance) {
-                fiberChartInstance.data.datasets[0].data = [
-                    fiberCauses['Khách quan'] || 0,
-                    fiberCauses['Chủ quan'] || 0,
-                    fiberCauses['Chưa làm hết trách nhiệm'] || 0,
-                    fiberCauses['Thiên tai'] || 0,
-                    fiberCauses['Đã báo trước nguy cơ'] || 0,
-                    fiberCauses['Suy hao/Đứt sợi'] || 0
-                ];
+                fiberChartInstance.data.datasets[0].data = Object.values(db.currentWeek.fiberCauses);
                 fiberChartInstance.update();
 
                 pieChartInstance.data.datasets[0].data = [
                     totalFiber,
-                    currentWeek.transCount || 0,
-                    currentWeek.cmipCount || 0,
-                    currentWeek.radioCount || 0,
-                    currentWeek.acCount || 0,
-                    currentWeek.powerCount || 0
+                    db.currentWeek.transCount || 0,
+                    db.currentWeek.cmipCount || 0,
+                    db.currentWeek.radioCount || 0,
+                    db.currentWeek.acCount || 0,
+                    db.currentWeek.powerCount || 0
                 ];
                 pieChartInstance.update();
             }
         }
 
-        // --- TAB SWITCHING ---
-        window.switchTab = function(tabId) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('.tab-btn').forEach(el => {
-                el.classList.remove('active-tab', 'border-white', 'text-white');
-                el.classList.add('border-transparent', 'text-blue-200');
-            });
-
-            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
-            const activeNav = document.getElementById(`nav-${tabId}`);
-            activeNav.classList.add('active-tab', 'border-white', 'text-white');
-            activeNav.classList.remove('border-transparent', 'text-blue-200');
-
-            if (tabId === 'dashboard') {
-                updateDashboard();
-            }
-        };
-
-        window.handleWeekSelectChange = function() {
-            selectedWeek = document.getElementById('globalWeekSelect').value;
-            setupRealtimeListeners();
-            showToast('Đã chuyển sang dữ liệu Tuần ' + selectedWeek);
-        };
-
-        window.handleWeekPickerChange = function() {
-            showToast('Đã tải lịch làm việc tuần được chọn');
-        };
-
-        // --- TAB 2 REALTIME ACTIONS ---
-        function loadCurrentWeekToForm() {
-            const data = window.appState.currentWeek;
-            document.getElementById('generalWeekInfo').value = data.generalInfo || '';
-            document.getElementById('transCount').value = data.transCount || 0;
-            document.getElementById('cmipCount').value = data.cmipCount || 0;
-            document.getElementById('radioCount').value = data.radioCount || 0;
-            document.getElementById('acCount').value = data.acCount || 0;
-            document.getElementById('powerCount').value = data.powerCount || 0;
-            document.getElementById('tvCount').value = data.tvCount || 0;
+        function handleFilterChange() {
+            fetchCloudData();
         }
-
-        window.saveCurrentWeekData = async function() {
-            const cause = document.getElementById('fiberCauseSelect').value;
-            const count = parseInt(document.getElementById('fiberCount').value) || 0;
-            
-            const updatedFiber = { ...(window.appState.currentWeek.fiberCauses || {}) };
-            if (count > 0) {
-                updatedFiber[cause] = (updatedFiber[cause] || 0) + count;
-                document.getElementById('fiberCount').value = '';
-            }
-
-            const updatedDoc = {
-                generalInfo: document.getElementById('generalWeekInfo').value,
-                fiberCauses: updatedFiber,
-                transCount: parseInt(document.getElementById('transCount').value) || 0,
-                cmipCount: parseInt(document.getElementById('cmipCount').value) || 0,
-                radioCount: parseInt(document.getElementById('radioCount').value) || 0,
-                acCount: parseInt(document.getElementById('acCount').value) || 0,
-                powerCount: parseInt(document.getElementById('powerCount').value) || 0,
-                tvCount: parseInt(document.getElementById('tvCount').value) || 0,
-                lastUpdatedBy: currentUser,
-                updatedAt: new Date().toISOString()
-            };
-
-            await setDoc(docPath('weekly_reports', 'week_' + selectedWeek), updatedDoc);
-            showToast('Đã lưu & đồng bộ dữ liệu tuần thành công!');
-        };
-
-        function renderFiberTable() {
-            const tbody = document.getElementById('fiberTableBody');
-            tbody.innerHTML = '';
-            const fiberCauses = window.appState.currentWeek.fiberCauses || {};
-
-            Object.entries(fiberCauses).forEach(([cause, count]) => {
-                const tr = document.createElement('tr');
-                tr.className = 'hover:bg-slate-50';
-                tr.innerHTML = `
-                    <td class="p-3 font-medium text-gray-800">${cause}</td>
-                    <td class="p-3 text-center"><span class="px-2 py-0.5 rounded-full text-xs font-bold ${count > 0 ? 'bg-amber-100 text-amber-800' : 'bg-gray-100 text-gray-500'}">${count}</span></td>
-                    <td class="p-3 text-gray-500">${count > 0 ? 'Cần theo dõi & xử lý dứt điểm' : 'Thường xuyên rà soát'}</td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        // --- TAB 3 REALTIME ACTIONS ---
-        window.addNextWeekTask = async function() {
-            const content = document.getElementById('nextTaskContent').value.trim();
-            const priority = document.getElementById('nextTaskPriority').value;
-            if (!content) {
-                alert('Vui lòng nhập nội dung công việc!');
-                return;
-            }
-
-            await addDoc(publicPath('next_week_tasks'), {
-                content: content,
-                priority: priority,
-                owner: currentUser,
-                createdAt: new Date().toISOString()
-            });
-
-            document.getElementById('nextTaskContent').value = '';
-            showToast('Đã thêm nhiệm vụ mới!');
-        };
-
-        window.deleteNextTask = async function(id) {
-            await deleteDoc(docPath('next_week_tasks', id));
-            showToast('Đã xóa nhiệm vụ!');
-        };
-
-        function renderNextWeekTasks() {
-            const tbody = document.getElementById('nextWeekTableBody');
-            tbody.innerHTML = '';
-            const tasks = window.appState.nextWeekTasks || [];
-
-            if (tasks.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-400">Chưa có công việc dự kiến nào trên đám mây.</td></tr>`;
-                return;
-            }
-
-            tasks.forEach((task, index) => {
-                let badgeClass = 'bg-blue-100 text-blue-800';
-                if (task.priority === 'Cao') badgeClass = 'bg-amber-100 text-amber-800';
-                if (task.priority === 'Khẩn cấp') badgeClass = 'bg-red-100 text-red-800';
-
-                const tr = document.createElement('tr');
-                tr.className = 'hover:bg-slate-50';
-                tr.innerHTML = `
-                    <td class="p-3 text-center font-bold text-gray-400">${index + 1}</td>
-                    <td class="p-3 font-medium text-gray-800">${task.content}</td>
-                    <td class="p-3"><span class="px-2.5 py-1 rounded-full text-[10px] font-bold ${badgeClass}">${task.priority}</span></td>
-                    <td class="p-3 text-gray-600 font-semibold">${task.owner}</td>
-                    <td class="p-3 text-center">
-                        <button onclick="deleteNextTask('${task.id}')" class="text-red-500 hover:text-red-700 p-1" title="Xóa"><i class="fas fa-trash"></i></button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        // --- TAB 4 REALTIME DOCUMENTS ACTIONS ---
-        function renderDocuments() {
-            const tbody = document.getElementById('docTableBody');
-            tbody.innerHTML = '';
-            const docs = window.appState.documents || [];
-
-            docs.forEach(docItem => {
-                let statusBadge = 'bg-blue-100 text-blue-800';
-                if (docItem.status === 'Đã hoàn thành') statusBadge = 'bg-emerald-100 text-emerald-800';
-                if (docItem.status === 'Chưa hoàn thành') statusBadge = 'bg-red-100 text-red-800';
-
-                const tr = document.createElement('tr');
-                tr.className = 'hover:bg-slate-50';
-                tr.innerHTML = `
-                    <td class="p-3 font-bold text-vnpt">${docItem.num}</td>
-                    <td class="p-3 font-medium text-gray-800">${docItem.content}</td>
-                    <td class="p-3 text-gray-600">${docItem.deadline}</td>
-                    <td class="p-3 text-gray-600">${docItem.weeklyProgress || '-'}</td>
-                    <td class="p-3"><span class="px-2.5 py-1 rounded-full text-[10px] font-bold ${statusBadge}">${docItem.status}</span></td>
-                    <td class="p-3 text-gray-600">${docItem.finishDate || '-'}</td>
-                    <td class="p-3 text-center flex items-center justify-center gap-1">
-                        <button onclick="openDocModal('${docItem.id}')" class="bg-blue-50 text-vnpt hover:bg-vnpt hover:text-white px-2.5 py-1 rounded text-xs font-semibold transition">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button onclick="deleteDocItem('${docItem.id}')" class="bg-red-50 text-red-600 hover:bg-red-600 hover:text-white px-2.5 py-1 rounded text-xs font-semibold transition">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        window.openDocModal = function(docId = null) {
-            const modal = document.getElementById('docModal');
-            const form = document.getElementById('docForm');
-            form.reset();
-
-            if (docId) {
-                const docItem = window.appState.documents.find(d => d.id === docId);
-                if (docItem) {
-                    document.getElementById('docModalTitle').textContent = 'Chỉnh Sửa Văn Bản';
-                    document.getElementById('docId').value = docItem.id;
-                    document.getElementById('docNum').value = docItem.num;
-                    document.getElementById('docDeadline').value = docItem.deadline;
-                    document.getElementById('docContent').value = docItem.content;
-                    document.getElementById('docWeeklyProgress').value = docItem.weeklyProgress || '';
-                    document.getElementById('docStatus').value = docItem.status;
-                    document.getElementById('docFinishDate').value = docItem.finishDate || '';
-                }
-            } else {
-                document.getElementById('docModalTitle').textContent = 'Thêm Văn Bản Mới';
-                document.getElementById('docId').value = '';
-            }
-
-            modal.classList.remove('hidden');
-        };
-
-        window.closeDocModal = function() {
-            document.getElementById('docModal').classList.add('hidden');
-        };
-
-        window.handleDocSubmit = async function(e) {
-            e.preventDefault();
-            const id = document.getElementById('docId').value;
-            const docData = {
-                num: document.getElementById('docNum').value,
-                deadline: document.getElementById('docDeadline').value,
-                content: document.getElementById('docContent').value,
-                weeklyProgress: document.getElementById('docWeeklyProgress').value,
-                status: document.getElementById('docStatus').value,
-                finishDate: document.getElementById('docFinishDate').value,
-                updatedBy: currentUser,
-                updatedAt: new Date().toISOString()
-            };
-
-            if (id) {
-                await setDoc(docPath('documents', id), docData, { merge: true });
-                showToast('Đã cập nhật văn bản!');
-            } else {
-                await addDoc(publicPath('documents'), docData);
-                showToast('Đã thêm văn bản mới!');
-            }
-
-            closeDocModal();
-        };
-
-        window.deleteDocItem = async function(id) {
-            await deleteDoc(docPath('documents', id));
-            showToast('Đã xóa văn bản!');
-        };
 
         // --- EXPORT TO EXCEL ---
-        window.exportToExcel = function() {
+        function exportToExcel() {
             const wb = XLSX.utils.book_new();
-            const currentWeek = window.appState.currentWeek || {};
-            const fiberCauses = currentWeek.fiberCauses || {};
 
             const currentWeekData = [
-                ['BÁO CÁO TỔNG HỢP SỰ CỐ KỸ THUẬT - VNPT NGHỆ AN'],
-                ['Tuần:', selectedWeek],
+                ['BÁO CÁO TỔNG HỢP SỰ CỐ KĨ THUẬT - VNPT'],
+                ['Tuần:', document.getElementById('globalWeekSelect').value],
                 [],
                 ['Hạng mục sự cố', 'Số lượng / Chi tiết'],
-                ['Sự cố Cáp quang - Do khách quan', fiberCauses['Khách quan'] || 0],
-                ['Sự cố Cáp quang - Do chủ quan', fiberCauses['Chủ quan'] || 0],
-                ['Sự cố Cáp quang - Do chưa làm hết trách nhiệm', fiberCauses['Chưa làm hết trách nhiệm'] || 0],
-                ['Sự cố Cáp quang - Do thiên tai', fiberCauses['Thiên tai'] || 0],
-                ['Sự cố Cáp quang - Đã báo trước nguy cơ', fiberCauses['Đã báo trước nguy cơ'] || 0],
-                ['Sự cố Cáp quang - Do suy hao/đứt sợi', fiberCauses['Suy hao/Đứt sợi'] || 0],
-                ['Sự cố Thiết bị Truyền dẫn', currentWeek.transCount || 0],
-                ['Sự cố Thiết bị CMIP', currentWeek.cmipCount || 0],
-                ['Sự cố Thiết bị Vô tuyến', currentWeek.radioCount || 0],
-                ['Sự cố Điều hòa', currentWeek.acCount || 0],
-                ['Sự cố Nguồn điện', currentWeek.powerCount || 0],
-                ['Tổng số phiên Truyền hình', currentWeek.tvCount || 0]
+                ['Sự cố Cáp quang - Do khách quan', db.currentWeek.fiberCauses['Khách quan'] || 0],
+                ['Sự cố Cáp quang - Do chủ quan', db.currentWeek.fiberCauses['Chủ quan'] || 0],
+                ['Sự cố Cáp quang - Do chưa làm hết trách nhiệm', db.currentWeek.fiberCauses['Chưa làm hết trách nhiệm'] || 0],
+                ['Sự cố Cáp quang - Do thiên tai', db.currentWeek.fiberCauses['Thiên tai'] || 0],
+                ['Sự cố Cáp quang - Đã báo trước nguy cơ', db.currentWeek.fiberCauses['Đã báo trước nguy cơ'] || 0],
+                ['Sự cố Cáp quang - Do suy hao/đứt sợi', db.currentWeek.fiberCauses['Suy hao/Đứt sợi'] || 0],
+                ['Sự cố Thiết bị Truyền dẫn', db.currentWeek.transCount || 0],
+                ['Sự cố Thiết bị CMIP', db.currentWeek.cmipCount || 0],
+                ['Sự cố Thiết bị Vô tuyến', db.currentWeek.radioCount || 0],
+                ['Sự cố Điều hòa', db.currentWeek.acCount || 0],
+                ['Sự cố Nguồn điện', db.currentWeek.powerCount || 0],
+                ['Tổng số phiên Truyền hình', db.currentWeek.tvCount || 0]
             ];
             const ws1 = XLSX.utils.aoa_to_sheet(currentWeekData);
             XLSX.utils.book_append_sheet(wb, ws1, "SuCoTuan");
 
             const docData = [
                 ['Số văn bản', 'Nội dung văn bản', 'Hạn hoàn thành', 'Thực hiện trong tuần', 'Tiến độ', 'Ngày hoàn thành'],
-                ...(window.appState.documents || []).map(d => [d.num, d.content, d.deadline, d.weeklyProgress, d.status, d.finishDate])
+                ...db.documents.map(d => [d.num, d.content, d.deadline, d.weeklyProgress, d.status, d.finishDate])
             ];
             const ws2 = XLSX.utils.aoa_to_sheet(docData);
             XLSX.utils.book_append_sheet(wb, ws2, "TheoDoiVanBan");
 
-            XLSX.writeFile(wb, `BaoCao_VNPT_Tuan_${selectedWeek}.xlsx`);
-            showToast('Đã xuất file Excel thành công!');
-        };
+            XLSX.writeFile(wb, `BaoCao_VNPT_Tuan_${document.getElementById('globalWeekSelect').value}.xlsx`);
+        }
     </script>
 </body>
 </html>
