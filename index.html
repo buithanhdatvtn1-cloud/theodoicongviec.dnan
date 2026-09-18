@@ -283,8 +283,8 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div class="bg-white p-4 rounded-xl shadow-sm border border-l-4 border-amber-500">
-                        <h4 class="font-semibold text-xs text-gray-500 uppercase tracking-wider mb-2">Chi Tiết Cáp Quang</h4>
-                        <ul class="text-xs space-y-1.5 text-gray-700" id="dashFiberList"></ul>
+                        <h4 class="font-semibold text-xs text-gray-500 uppercase tracking-wider mb-2">Chi Tiết Sự Cố Cáp Quang</h4>
+                        <ul class="text-xs space-y-2 text-gray-700 max-h-48 overflow-y-auto custom-scrollbar" id="dashFiberList"></ul>
                     </div>
                     <div class="bg-white p-4 rounded-xl shadow-sm border border-l-4 border-blue-500">
                         <h4 class="font-semibold text-xs text-gray-500 uppercase tracking-wider mb-2">Truyền Dẫn & CMIP</h4>
@@ -1031,8 +1031,13 @@
             });
         }
 
+        // --- HÀM DASHBOARD ĐÃ ĐƯỢC CẬP NHẬT HOÀN CHỈNH ---
         function updateDashboard() {
             if (!db.currentWeek) return;
+
+            // Lấy tuần hiện tại được chọn từ thanh Header
+            const selectedWeekVal = document.getElementById('globalWeekSelect')?.value || '38';
+            const selectedWeek = `2026-W${selectedWeekVal}`;
 
             let fiberCount = 0;
             let transCount = 0;
@@ -1043,16 +1048,22 @@
             let tvCount = 0;
 
             let fiberCauses = { 'Khách quan': 0, 'Chủ quan': 0, 'Chưa làm hết trách nhiệm': 0, 'Thiên tai': 0, 'Đã báo trước nguy cơ': 0, 'Suy hao/Đứt sợi': 0 };
+            let fiberDetails = []; // Lưu các mục sự cố cáp quang
 
-            (db.currentWeek.generalInfoList || []).forEach(item => {
+            // Lọc danh sách theo tuần được chọn
+            const currentList = (db.currentWeek.generalInfoList || []).filter(item => !item.week || item.week === selectedWeek);
+
+            currentList.forEach(item => {
                 const cat = item.category || '';
-                if (cat.includes('Cáp quang')) {
+                if (cat.toLowerCase().includes('cáp quang') || cat.toLowerCase().includes('cáp')) {
                     fiberCount++;
+                    fiberDetails.push(item);
+
                     if (cat.includes('Khách quan')) fiberCauses['Khách quan']++;
                     else if (cat.includes('Chủ quan')) fiberCauses['Chủ quan']++;
                     else if (cat.includes('Chưa làm hết trách nhiệm')) fiberCauses['Chưa làm hết trách nhiệm']++;
                     else if (cat.includes('Thiên tai')) fiberCauses['Thiên tai']++;
-                    else if (cat.includes('Đứt sợi')) fiberCauses['Suy hao/Đứt sợi']++;
+                    else if (cat.includes('Đứt sợi') || cat.includes('Suy hao')) fiberCauses['Suy hao/Đứt sợi']++;
                 } else if (cat.includes('Truyền dẫn')) transCount++;
                 else if (cat.includes('Chuyển mạch IP') || cat.includes('CMIP')) cmipCount++;
                 else if (cat.includes('Vô tuyến')) radioCount++;
@@ -1061,6 +1072,7 @@
                 else if (cat.includes('Truyền hình')) tvCount++;
             });
 
+            // Cập nhật các thông số thẻ Dashboard
             document.getElementById('dash-stat-fiber').textContent = fiberCount;
             document.getElementById('dash-stat-trans').textContent = transCount;
             document.getElementById('dash-stat-cmip').textContent = cmipCount;
@@ -1069,15 +1081,26 @@
             document.getElementById('dash-stat-power').textContent = powerCount;
             document.getElementById('dash-stat-tv').textContent = tvCount;
 
+            // Render danh sách chi tiết các sự cố Cáp Quang
             const dashFiberList = document.getElementById('dashFiberList');
             dashFiberList.innerHTML = '';
-            Object.entries(fiberCauses).forEach(([cause, cnt]) => {
-                dashFiberList.innerHTML += `<li class="flex justify-between items-center"><span>- ${cause}:</span> <strong class="text-gray-900">${cnt}</strong></li>`;
-            });
+
+            if (fiberDetails.length === 0) {
+                dashFiberList.innerHTML = `<li class="text-gray-400 italic">Không có sự cố cáp quang ghi nhận trong tuần này.</li>`;
+            } else {
+                fiberDetails.forEach(item => {
+                    dashFiberList.innerHTML += `
+                        <li class="border-b border-gray-100 pb-1.5 mb-1.5 last:border-0 leading-relaxed">
+                            <span class="font-bold text-amber-700 block">${item.category}</span> 
+                            <span class="text-gray-800 text-[11px]">${item.text}</span>
+                        </li>`;
+                });
+            }
 
             document.getElementById('dashTransText').textContent = `Tổng cộng ${transCount} sự cố Truyền dẫn & ${cmipCount} sự cố thiết bị CMIP được xử lý trong tuần.`;
             document.getElementById('dashPowerText').textContent = `Ghi nhận ${powerCount} sự cố Nguồn điện và ${acCount} sự cố Điều hòa nhiệt độ trạm.`;
 
+            // Cập nhật biểu đồ Chart.js
             if (fiberChartInstance && pieChartInstance) {
                 fiberChartInstance.data.datasets[0].data = Object.values(fiberCauses);
                 fiberChartInstance.update();
@@ -1090,6 +1113,7 @@
         }
 
         function handleFilterChange() {
+            updateDashboard();
             fetchCloudData();
         }
 
