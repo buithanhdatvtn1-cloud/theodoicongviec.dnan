@@ -323,7 +323,7 @@
                         </div>
                     </div>
 
-                    <!-- Ô Cập nhật thông tin chung (Có thể nhấn Enter xuống dòng, Lưu, Sửa, Xóa) -->
+                    <!-- Ô Cập nhật thông tin chung -->
                     <div class="bg-blue-50/50 p-4 rounded-xl border border-blue-100 space-y-3">
                         <label class="block text-xs font-bold text-gray-700 uppercase">
                             <i class="fas fa-edit text-vnpt mr-1"></i> Các Thông Tin Chung Trong Tuần
@@ -363,7 +363,7 @@
                                     <option value="Đã báo trước nguy cơ">Đã báo trước nguy cơ mất an toàn</option>
                                     <option value="Suy hao/Đứt sợi">Do suy hao/đứt sợi</option>
                                 </select>
-                                <input type="number" id="fiberCount" placeholder="Số lượng sự cố" min="0" class="p-2 border rounded-lg text-xs bg-white">
+                                <input type="number" id="fiberCount" placeholder="Số lượng cộng thêm" min="0" class="p-2 border rounded-lg text-xs bg-white">
                             </div>
                         </div>
 
@@ -593,11 +593,21 @@
                 const data = await res.json();
                 if (data) {
                     db = data;
+                    if (!db.currentWeek) {
+                        db.currentWeek = {
+                            generalInfoList: [],
+                            fiberCauses: { 'Khách quan': 0, 'Chủ quan': 0, 'Chưa làm hết trách nhiệm': 0, 'Thiên tai': 0, 'Đã báo trước nguy cơ': 0, 'Suy hao/Đứt sợi': 0 },
+                            transCount: 0, cmipCount: 0, radioCount: 0, acCount: 0, powerCount: 0, tvCount: 0
+                        };
+                    }
                     if (!db.currentWeek.generalInfoList) {
                         db.currentWeek.generalInfoList = [];
                         if (db.currentWeek.generalInfo) {
                             db.currentWeek.generalInfoList.push({ id: Date.now(), text: db.currentWeek.generalInfo });
                         }
+                    }
+                    if (!db.currentWeek.fiberCauses) {
+                        db.currentWeek.fiberCauses = { 'Khách quan': 0, 'Chủ quan': 0, 'Chưa làm hết trách nhiệm': 0, 'Thiên tai': 0, 'Đã báo trước nguy cơ': 0, 'Suy hao/Đứt sợi': 0 };
                     }
                     updateDashboard();
                     loadCurrentWeekToForm();
@@ -687,6 +697,7 @@
 
         // --- TAB 2: CURRENT WEEK LOGIC ---
         function loadCurrentWeekToForm() {
+            if (!db.currentWeek) return;
             document.getElementById('transCount').value = db.currentWeek.transCount || 0;
             document.getElementById('cmipCount').value = db.currentWeek.cmipCount || 0;
             document.getElementById('radioCount').value = db.currentWeek.radioCount || 0;
@@ -755,7 +766,7 @@
             const listEl = document.getElementById('generalInfoList');
             listEl.innerHTML = '';
 
-            if (!db.currentWeek.generalInfoList || db.currentWeek.generalInfoList.length === 0) {
+            if (!db.currentWeek || !db.currentWeek.generalInfoList || db.currentWeek.generalInfoList.length === 0) {
                 listEl.innerHTML = `<p class="text-xs text-gray-400 italic">Chưa có thông tin chung nào được cập nhật.</p>`;
                 return;
             }
@@ -784,6 +795,11 @@
         async function saveCurrentWeekData() {
             const cause = document.getElementById('fiberCauseSelect').value;
             const count = parseInt(document.getElementById('fiberCount').value) || 0;
+            
+            if (!db.currentWeek.fiberCauses) {
+                db.currentWeek.fiberCauses = { 'Khách quan': 0, 'Chủ quan': 0, 'Chưa làm hết trách nhiệm': 0, 'Thiên tai': 0, 'Đã báo trước nguy cơ': 0, 'Suy hao/Đứt sợi': 0 };
+            }
+
             if (count > 0) {
                 db.currentWeek.fiberCauses[cause] = (db.currentWeek.fiberCauses[cause] || 0) + count;
                 document.getElementById('fiberCount').value = '';
@@ -799,7 +815,7 @@
             updateDashboard();
 
             await postCloudData('saveCurrentWeek', db.currentWeek);
-            alert('Đã đồng bộ cập nhật lên Đám Mây hệ thống!');
+            alert('Đã đồng bộ cập nhật thành công!');
         }
 
         function loadWeekData() {
@@ -822,6 +838,7 @@
                 owner: currentUser
             };
 
+            if (!db.nextWeekTasks) db.nextWeekTasks = [];
             db.nextWeekTasks.push(newTask);
             document.getElementById('nextTaskContent').value = '';
             renderNextWeekTasks();
@@ -938,6 +955,7 @@
                 finishDate: document.getElementById('docFinishDate').value
             };
 
+            if (!db.documents) db.documents = [];
             const index = db.documents.findIndex(d => d.id == id);
             if (index !== -1) {
                 db.documents[index] = docData;
@@ -1060,7 +1078,7 @@
 
             const docData = [
                 ['Số văn bản', 'Nội dung văn bản', 'Hạn hoàn thành', 'Thực hiện trong tuần', 'Tiến độ', 'Ngày hoàn thành'],
-                ...db.documents.map(d => [d.num, d.content, d.deadline, d.weeklyProgress, d.status, d.finishDate])
+                ...(db.documents || []).map(d => [d.num, d.content, d.deadline, d.weeklyProgress, d.status, d.finishDate])
             ];
             const ws2 = XLSX.utils.aoa_to_sheet(docData);
             XLSX.utils.book_append_sheet(wb, ws2, "TheoDoiVanBan");
