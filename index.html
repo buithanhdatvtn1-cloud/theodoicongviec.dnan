@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Quản Lý Vận Hành - VNPT Nghệ An</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- SheetJS (xlsx) for real Excel exporting -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        vnpt: {
+                            DEFAULT: '#0066B3',
+                            dark: '#004B87',
+                            light: '#0080E0',
+                            accent: '#E6F0FA',
+                            bg: '#F4F7FA'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F4F7FA;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #0066B3;
+        }
+    </style>
+</head>
+<body class="text-gray-800 antialiased min-h-screen flex flex-col justify-between">
+
+    <!-- LOGIN MODAL -->
+    <div id="loginModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all border border-blue-100">
+            <!-- Header with VNPT Logo representation -->
+            <div class="bg-gradient-to-r from-vnpt-dark to-vnpt p-6 text-center text-white relative">
+                <div class="flex justify-center items-center mb-2">
+                    <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-lg p-2">
+                        <svg class="w-12 h-12 text-vnpt" viewBox="0 0 100 100" fill="currentColor">
+                            <path d="M50 10 C25 10 10 30 10 50 C10 75 30 90 50 90 C75 90 90 70 90 50 C90 25 70 10 50 10 Z M50 25 C65 25 75 35 75 50 C75 65 60 75 45 75 C30 75 25 60 25 50 C25 35 35 25 50 25 Z" fill="#0066B3"/>
+                            <circle cx="58" cy="42" r="14" fill="#0080E0" />
+                        </svg>
+                    </div>
+                </div>
+                <h2 class="text-2xl font-bold tracking-wide">VNPT NET1-ĐÀI VT NGHỆ AN</h2>
+                <p class="text-xs text-blue-100 uppercase tracking-widest mt-1">Hệ Thống Quản Lý Vận Hành Tập Trung</p>
+            </div>
+            
+            <form id="loginForm" class="p-6 space-y-4">
+                <div id="loginError" class="hidden p-3 bg-red-50 border-l-4 border-red-500 text-red-700 text-xs rounded">
+                    Tài khoản hoặc mật khẩu không chính xác!
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Tài khoản User</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                            <i class="fas fa-user"></i>
+                        </span>
+                        <select id="loginUser" required class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-vnpt focus:border-vnpt text-sm font-medium">
+                            <option value="" disabled selected>-- Chọn tài khoản cán bộ --</option>
+                            <option value="tvkhoa">tvkhoa</option>
+                            <option value="nhmai">nhmai</option>
+                            <option value="chiennv3">chiennv3</option>
+                            <option value="ndnguyen">ndnguyen</option>
+                            <option value="nguyenvancuong1">nguyenvancuong1</option>
+                            <option value="phanthanhha1">phanthanhha1</option>
+                            <option value="ththanh">ththanh</option>
+                            <option value="btdat">btdat</option>
+                            <option value="tkt.nan">tkt.nan</option>
+                            <option value="nhquang">nhquang</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Mật khẩu</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                            <i class="fas fa-lock"></i>
+                        </span>
+                        <input type="password" id="loginPass" required placeholder="Nhập mật khẩu..." value="" class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-vnpt focus:border-vnpt text-sm">
+                    </div>
+                </div>
+                <button type="submit" class="w-full bg-vnpt hover:bg-vnpt-dark text-white font-semibold py-3 rounded-lg shadow-md transition duration-200 flex justify-center items-center gap-2">
+                    <i class="fas fa-sign-in-alt"></i> Đăng nhập Hệ Thống
+                </button>
+            </form>
+            <div class="bg-gray-50 px-6 py-3 border-t text-center text-xs text-gray-500">
+                Tập đoàn Bưu chính Viễn thông Việt Nam &copy; 2026
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN APP STRUCTURE -->
+    <div id="appContainer" class="hidden min-h-screen flex flex-col">
+        <!-- HEADER -->
+        <header class="bg-vnpt text-white shadow-lg sticky top-0 z-40">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-16">
+                    <!-- Brand -->
+                    <div class="flex items-center gap-3">
+                        <div class="bg-white p-1.5 rounded-lg shadow-sm flex items-center justify-center">
+                            <svg class="w-7 h-7 text-vnpt" viewBox="0 0 100 100" fill="currentColor">
+                                <path d="M50 10 C25 10 10 30 10 50 C10 75 30 90 50 90 C75 90 90 70 90 50 C90 25 70 10 50 10 Z M50 25 C65 25 75 35 75 50 C75 65 60 75 45 75 C30 75 25 60 25 50 C25 35 35 25 50 25 Z" fill="#0066B3"/>
+                                <circle cx="58" cy="42" r="14" fill="#0080E0" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h1 class="font-bold text-lg leading-tight tracking-wide">VNPT NET1-ĐÀI VIỄN THÔNG NGHỆ AN</h1>
+                            <div class="flex items-center gap-2">
+                                <p class="text-[10px] text-blue-200 uppercase tracking-widest">Trung Tâm Vận Hành Kỹ Thuật</p>
+                                <span class="bg-emerald-500 text-[9px] px-1.5 py-0.5 rounded-full font-bold flex items-center gap-1 animate-pulse">
+                                    <i class="fas fa-wifi text-[8px]"></i> REALTIME ONLINE
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Global Controls (Week Filter & Export) -->
+                    <div class="hidden md:flex items-center space-x-3">
+                        <div class="bg-vnpt-dark/60 backdrop-blur rounded-lg p-1.5 flex items-center gap-2 border border-blue-400/30 text-xs">
+                            <i class="far fa-calendar-alt text-blue-200 ml-1"></i>
+                            <span class="text-blue-100 font-medium">Tuần:</span>
+                            <select id="globalWeekSelect" onchange="handleWeekSelectChange()" class="bg-white text-gray-800 font-semibold px-2 py-1 rounded border-none text-xs focus:ring-1 focus:ring-vnpt">
+                                <option value="38">Tuần 38 (15/09 - 21/09/2026)</option>
+                                <option value="37">Tuần 37 (08/09 - 14/09/2026)</option>
+                                <option value="36">Tuần 36 (01/09 - 07/09/2026)</option>
+                                <option value="35">Tuần 35 (25/08 - 31/08/2026)</option>
+                            </select>
+                        </div>
+
+                        <!-- Export Button -->
+                        <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold shadow flex items-center gap-1.5 transition">
+                            <i class="fas fa-file-excel text-sm"></i> Xuất Excel
+                        </button>
+                    </div>
+
+                    <!-- User Profile & Logout -->
+                    <div class="flex items-center gap-3">
+                        <div class="flex items-center gap-2 bg-vnpt-dark/80 px-3 py-1.5 rounded-full border border-blue-400/20">
+                            <div class="w-6 h-6 rounded-full bg-blue-300 text-vnpt font-bold text-xs flex items-center justify-center" id="userAvatar">U</div>
+                            <span class="text-xs font-medium text-white hidden sm:inline" id="currentUsername">User</span>
+                        </div>
+                        <button onclick="logout()" title="Đăng xuất" class="text-blue-200 hover:text-white p-2 rounded-lg hover:bg-vnpt-dark transition">
+                            <i class="fas fa-power-off"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NAVIGATION TABS -->
+            <div class="bg-vnpt-dark px-4 sm:px-6 lg:px-8 border-t border-blue-500/30">
+                <div class="max-w-7xl mx-auto flex space-x-1 sm:space-x-4 overflow-x-auto custom-scrollbar">
+                    <button onclick="switchTab('dashboard')" id="nav-dashboard" class="tab-btn active-tab px-4 py-3 text-xs sm:text-sm font-semibold flex items-center gap-2 border-b-2 border-white text-white whitespace-nowrap transition">
+                        <i class="fas fa-chart-pie"></i> Dashboard
+                    </button>
+                    <button onclick="switchTab('currentWeek')" id="nav-currentWeek" class="tab-btn px-4 py-3 text-xs sm:text-sm font-semibold flex items-center gap-2 border-b-2 border-transparent text-blue-200 hover:text-white whitespace-nowrap transition">
+                        <i class="fas fa-tasks"></i> Công việc thực hiện trong tuần
+                    </button>
+                    <button onclick="switchTab('nextWeek')" id="nav-nextWeek" class="tab-btn px-4 py-3 text-xs sm:text-sm font-semibold flex items-center gap-2 border-b-2 border-transparent text-blue-200 hover:text-white whitespace-nowrap transition">
+                        <i class="fas fa-calendar-plus"></i> Dự kiến công việc tuần tới
+                    </button>
+                    <button onclick="switchTab('documents')" id="nav-documents" class="tab-btn px-4 py-3 text-xs sm:text-sm font-semibold flex items-center gap-2 border-b-2 border-transparent text-blue-200 hover:text-white whitespace-nowrap transition">
+                        <i class="fas fa-file-contract"></i> Theo dõi văn bản
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- MAIN CONTENT AREA -->
+        <main class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow">
+
+            <!-- TAB 1: DASHBOARD -->
+            <section id="tab-dashboard" class="tab-content space-y-6">
+                <!-- Top Summary Cards -->
+                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
+                    <div class="bg-white p-3.5 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition">
+                        <div class="flex items-center justify-between text-amber-600 mb-1">
+                            <i class="fas fa-network-wired text-lg"></i>
+                            <span class="text-[10px] bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded font-bold">Cáp Quang</span>
+                        </div>
+                        <div class="text-xl font-bold text-gray-800" id="dash-stat-fiber">0</div>
+                        <p class="text-[11px] text-gray-500 mt-0.5">Sự cố ghi nhận</p>
+                    </div>
+
+                    <div class="bg-white p-3.5 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition">
+                        <div class="flex items-center justify-between text-blue-600 mb-1">
+                            <i class="fas fa-server text-lg"></i>
+                            <span class="text-[10px] bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded font-bold">Truyền Dẫn</span>
+                        </div>
+                        <div class="text-xl font-bold text-gray-800" id="dash-stat-trans">0</div>
+                        <p class="text-[11px] text-gray-500 mt-0.5">Sự cố ghi nhận</p>
+                    </div>
+
+                    <div class="bg-white p-3.5 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition">
+                        <div class="flex items-center justify-between text-purple-600 mb-1">
+                            <i class="fas fa-microchip text-lg"></i>
+                            <span class="text-[10px] bg-purple-50 text-purple-700 px-1.5 py-0.5 rounded font-bold">CMIP</span>
+                        </div>
+                        <div class="text-xl font-bold text-gray-800" id="dash-stat-cmip">0</div>
+                        <p class="text-[11px] text-gray-500 mt-0.5">Sự cố ghi nhận</p>
+                    </div>
+
+                    <div class="bg-white p-3.5 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition">
+                        <div class="flex items-center justify-between text-cyan-600 mb-1">
+                            <i class="fas fa-broadcast-tower text-lg"></i>
+                            <span class="text-[10px] bg-cyan-50 text-cyan-700 px-1.5 py-0.5 rounded font-bold">Vô Tuyến</span>
+                        </div>
+                        <div class="text-xl font-bold text-gray-800" id="dash-stat-radio">0</div>
+                        <p class="text-[11px] text-gray-500 mt-0.5">Sự cố ghi nhận</p>
+                    </div>
+
+                    <div class="bg-white p-3.5 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition">
+                        <div class="flex items-center justify-between text-teal-600 mb-1">
+                            <i class="fas fa-snowflake text-lg"></i>
+                            <span class="text-[10px] bg-teal-50 text-teal-700 px-1.5 py-0.5 rounded font-bold">Điều Hòa</span>
+                        </div>
+                        <div class="text-xl font-bold text-gray-800" id="dash-stat-ac">0</div>
+                        <p class="text-[11px] text-gray-500 mt-0.5">Sự cố ghi nhận</p>
+                    </div>
+
+                    <div class="bg-white p-3.5 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition">
+                        <div class="flex items-center justify-between text-red-600 mb-1">
+                            <i class="fas fa-bolt text-lg"></i>
+                            <span class="text-[10px] bg-red-50 text-red-700 px-1.5 py-0.5 rounded font-bold">Nguồn Điện</span>
+                        </div>
+                        <div class="text-xl font-bold text-gray-800" id="dash-stat-power">0</div>
+                        <p class="text-[11px] text-gray-500 mt-0.5">Sự cố ghi nhận</p>
+                    </div>
+
+                    <div class="bg-white p-3.5 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition col-span-2 sm:col-span-1">
+                        <div class="flex items-center justify-between text-indigo-600 mb-1">
+                            <i class="fas fa-video text-lg"></i>
+                            <span class="text-[10px] bg-indigo-50 text-indigo-700 px-1.5 py-0.5 rounded font-bold">Truyền Hình</span>
+                        </div>
+                        <div class="text-xl font-bold text-gray-800" id="dash-stat-tv">0</div>
+                        <p class="text-[11px] text-gray-500 mt-0.5">Phiên phục vụ</p>
+                    </div>
+                </div>
+
+                <!-- Charts Row -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Fiber Optic Cause Chart -->
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 lg:col-span-2">
+                        <div class="flex items-center justify-between mb-4 pb-2 border-b border-gray-100">
+                            <h3 class="font-bold text-gray-800 text-sm flex items-center gap-2">
+                                <i class="fas fa-chart-bar text-vnpt"></i> Phân Tích Nguyên Nhân Sự Cố Cáp Quang
+                            </h3>
+                            <span class="text-xs text-gray-400 font-medium">Chi tiết nguyên nhân</span>
+                        </div>
+                        <div class="h-64 relative">
+                            <canvas id="fiberCausesChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Category Overview Chart -->
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+                        <div class="flex items-center justify-between mb-4 pb-2 border-b border-gray-100">
+                            <h3 class="font-bold text-gray-800 text-sm flex items-center gap-2">
+                                <i class="fas fa-chart-pie text-vnpt"></i> Tỷ Lệ Sự Cố Theo Lĩnh Vực
+                            </h3>
+                            <span class="text-xs text-gray-400">Tổng quan</span>
+                        </div>
+                        <div class="h-64 relative flex items-center justify-center">
+                            <canvas id="categoryPieChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detailed Summary Cards Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-l-4 border-amber-500">
+                        <h4 class="font-semibold text-xs text-gray-500 uppercase tracking-wider mb-2">Chi Tiết Cáp Quang</h4>
+                        <ul class="text-xs space-y-1.5 text-gray-700" id="dashFiberList">
+                            <!-- Populated via JS -->
+                        </ul>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-l-4 border-blue-500">
+                        <h4 class="font-semibold text-xs text-gray-500 uppercase tracking-wider mb-2">Truyền Dẫn & CMIP</h4>
+                        <p class="text-xs text-gray-700 font-medium" id="dashTransText">Đang tải dữ liệu realtime...</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-l-4 border-indigo-500">
+                        <h4 class="font-semibold text-xs text-gray-500 uppercase tracking-wider mb-2">Hạ Tầng Điện & Điều Hòa</h4>
+                        <p class="text-xs text-gray-700 font-medium" id="dashPowerText">Đang tải dữ liệu realtime...</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 2: CÔNG VIỆC THỰC HIỆN TRONG TUẦN -->
+            <section id="tab-currentWeek" class="tab-content hidden space-y-6">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-6">
+                    <div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b">
+                        <div>
+                            <h2 class="text-lg font-bold text-gray-800">Cập Nhật Công Việc & Sự Cố Trong Tuần</h2>
+                            <p class="text-xs text-gray-500">Nhập số liệu báo cáo kỹ thuật theo từng hạng mục chuyên môn (Đồng bộ trực tiếp)</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <label class="text-xs font-semibold text-gray-600">Chọn Lịch Tuần:</label>
+                            <input type="week" id="weekPicker" value="2026-W38" onchange="handleWeekPickerChange()" class="px-3 py-1.5 bg-gray-50 border border-gray-300 rounded-lg text-xs font-semibold focus:ring-vnpt">
+                        </div>
+                    </div>
+
+                    <!-- Ô Cập nhật thông tin chung -->
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 uppercase mb-2">
+                            <i class="fas fa-edit text-vnpt mr-1"></i> Ô cập nhật các thông tin chung trong tuần
+                        </label>
+                        <textarea id="generalWeekInfo" rows="3" class="w-full p-3 border border-gray-300 rounded-xl text-xs focus:ring-2 focus:ring-vnpt focus:border-vnpt" placeholder="Nhập các thông tin chỉ đạo, lưu ý hoặc tình hình chung trong tuần..."></textarea>
+                    </div>
+
+                    <!-- Form nhập sự cố -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                        <!-- Cáp quang nguyên nhân -->
+                        <div class="col-span-1 md:col-span-2">
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">Sự cố Cáp quang (Chọn nguyên nhân)</label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <select id="fiberCauseSelect" class="p-2 border rounded-lg text-xs bg-white">
+                                    <option value="Khách quan">Do khách quan</option>
+                                    <option value="Chủ quan">Do chủ quan</option>
+                                    <option value="Chưa làm hết trách nhiệm">Do chưa làm hết trách nhiệm</option>
+                                    <option value="Thiên tai">Do thiên tai</option>
+                                    <option value="Đã báo trước nguy cơ">Đã báo trước nguy cơ mất an toàn</option>
+                                    <option value="Suy hao/Đứt sợi">Do suy hao/đứt sợi</option>
+                                </select>
+                                <input type="number" id="fiberCount" placeholder="Số lượng sự cố" min="0" class="p-2 border rounded-lg text-xs bg-white">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">TB Truyền dẫn (Số lượng)</label>
+                            <input type="number" id="transCount" placeholder="Số sự cố" min="0" class="w-full p-2 border rounded-lg text-xs bg-white">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">TB CMIP (Số lượng)</label>
+                            <input type="number" id="cmipCount" placeholder="Số sự cố" min="0" class="w-full p-2 border rounded-lg text-xs bg-white">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">TB Vô tuyến (Số lượng)</label>
+                            <input type="number" id="radioCount" placeholder="Số sự cố" min="0" class="w-full p-2 border rounded-lg text-xs bg-white">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">Điều hòa (Số lượng)</label>
+                            <input type="number" id="acCount" placeholder="Số sự cố" min="0" class="w-full p-2 border rounded-lg text-xs bg-white">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">Nguồn điện (Số lượng)</label>
+                            <input type="number" id="powerCount" placeholder="Số sự cố" min="0" class="w-full p-2 border rounded-lg text-xs bg-white">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">Phiên Truyền hình (Phiên)</label>
+                            <input type="number" id="tvCount" placeholder="Số phiên" min="0" class="w-full p-2 border rounded-lg text-xs bg-white">
+                        </div>
+
+                        <div class="col-span-1 md:col-span-2 lg:col-span-4 flex justify-end gap-2 mt-2">
+                            <button onclick="saveCurrentWeekData()" class="bg-vnpt hover:bg-vnpt-dark text-white px-5 py-2 rounded-lg text-xs font-bold shadow flex items-center gap-2">
+                                <i class="fas fa-cloud-upload-alt"></i> Lưu Đồng Bộ Realtime
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Bảng tổng hợp sự cố cáp quang chi tiết -->
+                    <div>
+                        <h3 class="text-sm font-bold text-gray-800 mb-3 flex items-center gap-2">
+                            <i class="fas fa-list-alt text-vnpt"></i> Bảng Tổng Hợp Chi Tiết Sự Cố Cáp Quang Trong Tuần
+                        </h3>
+                        <div class="overflow-x-auto rounded-xl border border-gray-200">
+                            <table class="w-full text-xs text-left text-gray-600">
+                                <thead class="bg-gray-100 text-gray-700 font-bold uppercase border-b">
+                                    <tr>
+                                        <th class="p-3">Nguyên nhân sự cố Cáp quang</th>
+                                        <th class="p-3 text-center">Số lượng</th>
+                                        <th class="p-3">Ghi chú / Đánh giá</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="fiberTableBody" class="divide-y divide-gray-100">
+                                    <!-- Populated JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 3: DỰ KIẾN CÔNG VIỆC TUẦN TỚI -->
+            <section id="tab-nextWeek" class="tab-content hidden space-y-6">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-6">
+                    <div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b">
+                        <div>
+                            <h2 class="text-lg font-bold text-gray-800">Kế Hoạch & Dự Kiến Công Việc Tuần Tới</h2>
+                            <p class="text-xs text-gray-500">Lập kế hoạch công tác, bảo dưỡng, phòng ngừa sự cố cho tuần tiếp theo</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <label class="text-xs font-semibold text-gray-600">Chọn Tuần Tới:</label>
+                            <input type="week" id="nextWeekPicker" value="2026-W39" class="px-3 py-1.5 bg-gray-50 border border-gray-300 rounded-lg text-xs font-semibold focus:ring-vnpt">
+                        </div>
+                    </div>
+
+                    <!-- Form Thêm Dự Kiến -->
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
+                        <h3 class="text-xs font-bold text-gray-700 uppercase">Thêm Hạng Mục Công Việc Dự Kiến</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                            <div class="md:col-span-2">
+                                <input type="text" id="nextTaskContent" placeholder="Nội dung công việc dự kiến..." class="w-full p-2.5 border rounded-lg text-xs bg-white">
+                            </div>
+                            <div>
+                                <select id="nextTaskPriority" class="w-full p-2.5 border rounded-lg text-xs bg-white">
+                                    <option value="Bình thường">Độ ưu tiên: Bình thường</option>
+                                    <option value="Cao">Độ ưu tiên: Cao</option>
+                                    <option value="Khẩn cấp">Độ ưu tiên: Khẩn cấp</option>
+                                </select>
+                            </div>
+                            <div>
+                                <button onclick="addNextWeekTask()" class="w-full bg-vnpt hover:bg-vnpt-dark text-white p-2.5 rounded-lg text-xs font-bold shadow flex items-center justify-center gap-2">
+                                    <i class="fas fa-plus-circle"></i> Thêm Nhiệm Vụ Realtime
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bảng Danh Sách Công Việc Dự Kiến -->
+                    <div class="overflow-x-auto rounded-xl border border-gray-200">
+                        <table class="w-full text-xs text-left text-gray-600">
+                            <thead class="bg-gray-100 text-gray-700 font-bold uppercase border-b">
+                                <tr>
+                                    <th class="p-3 w-12 text-center">STT</th>
+                                    <th class="p-3">Nội dung công việc tuần tới</th>
+                                    <th class="p-3 w-32">Mức độ ưu tiên</th>
+                                    <th class="p-3 w-32">Người phụ trách</th>
+                                    <th class="p-3 w-24 text-center">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody id="nextWeekTableBody" class="divide-y divide-gray-100">
+                                <!-- JS items -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 4: THEO DÕI CÁC VĂN BẢN -->
+            <section id="tab-documents" class="tab-content hidden space-y-6">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-6">
+                    <div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b">
+                        <div>
+                            <h2 class="text-lg font-bold text-gray-800">Theo Dõi Chỉ Đạo & Văn Bản Dịch Vụ</h2>
+                            <p class="text-xs text-gray-500">Quản lý các văn bản chỉ đạo, hạn hoàn thành và tiến độ thực hiện</p>
+                        </div>
+                        <button onclick="openDocModal()" class="bg-vnpt hover:bg-vnpt-dark text-white px-4 py-2 rounded-lg text-xs font-bold shadow flex items-center gap-2">
+                            <i class="fas fa-file-medical"></i> Thêm Văn Bản Mới
+                        </button>
+                    </div>
+
+                    <!-- Bảng Danh Sách Văn Bản -->
+                    <div class="overflow-x-auto rounded-xl border border-gray-200">
+                        <table class="w-full text-xs text-left text-gray-600">
+                            <thead class="bg-gray-100 text-gray-700 font-bold uppercase border-b">
+                                <tr>
+                                    <th class="p-3 font-bold">Số VB</th>
+                                    <th class="p-3 font-bold min-w-[200px]">Nội dung văn bản</th>
+                                    <th class="p-3 font-bold">Hạn hoàn thành</th>
+                                    <th class="p-3 font-bold min-w-[180px]">Nội dung thực hiện trong tuần</th>
+                                    <th class="p-3 font-bold">Tiến độ</th>
+                                    <th class="p-3 font-bold">Ngày hoàn thành</th>
+                                    <th class="p-3 font-bold text-center">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody id="docTableBody" class="divide-y divide-gray-100">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- FOOTER -->
+        <footer class="bg-white border-t py-4 text-center text-xs text-gray-500">
+            <p>Hệ Thống Báo Cáo Điều Hành Kỹ Thuật - VNPT &copy; 2026. Phát triển tích hợp Firebase Cloud Realtime Sync.</p>
+        </footer>
+    </div>
+
+    <!-- EDIT/ADD DOCUMENT MODAL -->
+    <div id="docModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-xl overflow-hidden">
+            <div class="bg-vnpt px-6 py-4 text-white flex justify-between items-center">
+                <h3 class="font-bold text-sm" id="docModalTitle">Chỉnh Sửa Văn Bản</h3>
+                <button onclick="closeDocModal()" class="text-blue-200 hover:text-white"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="docForm" onsubmit="handleDocSubmit(event)" class="p-6 space-y-4">
+                <input type="hidden" id="docId">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 mb-1">Số Văn Bản</label>
+                        <input type="text" id="docNum" required placeholder="123/VB-VNPT" class="w-full p-2.5 border rounded-lg text-xs">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 mb-1">Hạn Hoàn Thành</label>
+                        <input type="date" id="docDeadline" required class="w-full p-2.5 border rounded-lg text-xs">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Nội Dung Văn Bản</label>
+                    <textarea id="docContent" rows="2" required placeholder="Trích yếu nội dung chỉ đạo..." class="w-full p-2.5 border rounded-lg text-xs"></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Nội Dung Thực Hiện Trong Tuần</label>
+                    <textarea id="docWeeklyProgress" rows="2" placeholder="Tình hình triển khai cụ thể tuần này..." class="w-full p-2.5 border rounded-lg text-xs"></textarea>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 mb-1">Tiến Độ Hoàn Thành</label>
+                        <select id="docStatus" class="w-full p-2.5 border rounded-lg text-xs font-medium">
+                            <option value="Đang thực hiện">Đang thực hiện</option>
+                            <option value="Đã hoàn thành">Đã hoàn thành</option>
+                            <option value="Chưa hoàn thành">Chưa hoàn thành</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 mb-1">Ngày Hoàn Thành (Nếu có)</label>
+                        <input type="date" id="docFinishDate" class="w-full p-2.5 border rounded-lg text-xs">
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-2 border-t">
+                    <button type="button" onclick="closeDocModal()" class="px-4 py-2 border rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-50">Hủy</button>
+                    <button type="submit" class="px-5 py-2 bg-vnpt hover:bg-vnpt-dark text-white rounded-lg text-xs font-bold shadow">Lưu Thay Đổi Realtime</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Notification Toast Modal -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-emerald-600 text-white px-4 py-3 rounded-xl shadow-xl flex items-center gap-3 transition-opacity duration-300 opacity-0 pointer-events-none z-50 text-xs font-semibold">
+        <i class="fas fa-check-circle text-lg"></i>
+        <span id="toastMsg">Thao tác thành công!</span>
+    </div>
+
+    <!-- FIREBASE MODULE & APPLICATION LOGIC -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot, collection, addDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Environment Variables Injection
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'vnpt-nghean-app';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+            apiKey: "demo-key",
+            authDomain: "demo-app.firebaseapp.com",
+            projectId: "demo-app",
+            storageBucket: "demo-app.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:demo"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Firestore Realtime Collections Paths
+        const publicPath = (collName) => collection(db, 'artifacts', appId, 'public', 'data', collName);
+        const docPath = (collName, id) => doc(db, 'artifacts', appId, 'public', 'data', collName, id);
+
+        // App Local Data Mirror
+        window.appState = {
+            currentWeek: {
+                generalInfo: "Duy trì ổn định hạ tầng mạng lưới phục vụ các sự kiện quan trọng. Tăng cường ứng trực 24/7.",
+                fiberCauses: {
+                    'Khách quan': 3,
+                    'Chủ quan': 1,
+                    'Chưa làm hết trách nhiệm': 0,
+                    'Thiên tai': 2,
+                    'Đã báo trước nguy cơ': 1,
+                    'Suy hao/Đứt sợi': 5
+                },
+                transCount: 5,
+                cmipCount: 3,
+                radioCount: 7,
+                acCount: 2,
+                powerCount: 4,
+                tvCount: 18
+            },
+            nextWeekTasks: [],
+            documents: []
+        };
+
+        // User Accounts
+        const VALID_USERS = [
+            'tvkhoa', 'nhmai', 'chiennv3', 'ndnguyen', 
+            'nguyenvancuong1', 'phanthanhha1', 'ththanh', 
+            'btdat', 'tkt.nan', 'nhquang'
+        ];
+        const VALID_PASS = 'Adm@123';
+
+        let currentUser = localStorage.getItem('vnpt_user') || null;
+        let selectedWeek = '38';
+
+        // Firebase Auth Initialization
+        async function authenticateUser() {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (err) {
+                console.warn("Auth initialization fallback:", err);
+            }
+        }
+
+        // Setup Firestore Realtime Listeners
+        function setupRealtimeListeners() {
+            // 1. Current Week Document Listener
+            onSnapshot(docPath('weekly_reports', 'week_' + selectedWeek), (docSnap) => {
+                if (docSnap.exists()) {
+                    window.appState.currentWeek = docSnap.data();
+                } else {
+                    // Seed initial data if document doesn't exist yet
+                    setDoc(docPath('weekly_reports', 'week_' + selectedWeek), window.appState.currentWeek);
+                }
+                loadCurrentWeekToForm();
+                renderFiberTable();
+                updateDashboard();
+            }, (err) => console.error("Realtime Error Week Report:", err));
+
+            // 2. Next Week Tasks Collection Listener
+            onSnapshot(publicPath('next_week_tasks'), (snapshot) => {
+                const tasks = [];
+                snapshot.forEach(doc => {
+                    tasks.push({ id: doc.id, ...doc.data() });
+                });
+                window.appState.nextWeekTasks = tasks;
+                renderNextWeekTasks();
+            }, (err) => console.error("Realtime Error Next Tasks:", err));
+
+            // 3. Documents Collection Listener
+            onSnapshot(publicPath('documents'), (snapshot) => {
+                const docs = [];
+                snapshot.forEach(doc => {
+                    docs.push({ id: doc.id, ...doc.data() });
+                });
+                window.appState.documents = docs;
+                renderDocuments();
+            }, (err) => console.error("Realtime Error Docs:", err));
+        }
+
+        // Toast Helper
+        window.showToast = function(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMsg').textContent = msg;
+            toast.classList.remove('opacity-0', 'pointer-events-none');
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'pointer-events-none');
+            }, 2500);
+        };
+
+        // --- AUTHENTICATION EVENTS ---
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const user = document.getElementById('loginUser').value;
+            const pass = document.getElementById('loginPass').value;
+
+            if (VALID_USERS.includes(user) && pass === VALID_PASS) {
+                currentUser = user;
+                localStorage.setItem('vnpt_user', user);
+                document.getElementById('loginError').classList.add('hidden');
+                await initApp();
+                showToast('Đăng nhập thành công!');
+            } else {
+                document.getElementById('loginError').classList.remove('hidden');
+            }
+        });
+
+        window.logout = function() {
+            localStorage.removeItem('vnpt_user');
+            currentUser = null;
+            document.getElementById('appContainer').classList.add('hidden');
+            document.getElementById('loginModal').classList.remove('hidden');
+            document.getElementById('loginPass').value = '';
+        };
+
+        // --- APP INIT ---
+        async function initApp() {
+            await authenticateUser();
+            document.getElementById('loginModal').classList.add('hidden');
+            document.getElementById('appContainer').classList.remove('hidden');
+            document.getElementById('currentUsername').textContent = currentUser;
+            document.getElementById('userAvatar').textContent = currentUser.charAt(0).toUpperCase();
+
+            initCharts();
+            setupRealtimeListeners();
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            if (currentUser && VALID_USERS.includes(currentUser)) {
+                initApp();
+            }
+        });
+
+        let fiberChartInstance = null;
+        let pieChartInstance = null;
+
+        function initCharts() {
+            const fiberCtx = document.getElementById('fiberCausesChart').getContext('2d');
+            fiberChartInstance = new Chart(fiberCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Khách quan', 'Chủ quan', 'Chưa hết trách nhiệm', 'Thiên tai', 'Đã báo nguy cơ', 'Suy hao/Đứt sợi'],
+                    datasets: [{
+                        label: 'Số vụ sự cố',
+                        data: [0, 0, 0, 0, 0, 0],
+                        backgroundColor: '#0066B3',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+                }
+            });
+
+            const pieCtx = document.getElementById('categoryPieChart').getContext('2d');
+            pieChartInstance = new Chart(pieCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Cáp quang', 'Truyền dẫn', 'CMIP', 'Vô tuyến', 'Điều hòa', 'Nguồn điện'],
+                    datasets: [{
+                        data: [0, 0, 0, 0, 0, 0],
+                        backgroundColor: ['#f59e0b', '#3b82f6', '#a855f7', '#06b6d4', '#14b8a6', '#ef4444']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } } }
+                }
+            });
+        }
+
+        function updateDashboard() {
+            const currentWeek = window.appState.currentWeek || {};
+            const fiberCauses = currentWeek.fiberCauses || {};
+            const totalFiber = Object.values(fiberCauses).reduce((a, b) => Number(a) + Number(b), 0);
+
+            document.getElementById('dash-stat-fiber').textContent = totalFiber;
+            document.getElementById('dash-stat-trans').textContent = currentWeek.transCount || 0;
+            document.getElementById('dash-stat-cmip').textContent = currentWeek.cmipCount || 0;
+            document.getElementById('dash-stat-radio').textContent = currentWeek.radioCount || 0;
+            document.getElementById('dash-stat-ac').textContent = currentWeek.acCount || 0;
+            document.getElementById('dash-stat-power').textContent = currentWeek.powerCount || 0;
+            document.getElementById('dash-stat-tv').textContent = currentWeek.tvCount || 0;
+
+            const dashFiberList = document.getElementById('dashFiberList');
+            dashFiberList.innerHTML = '';
+            Object.entries(fiberCauses).forEach(([cause, cnt]) => {
+                dashFiberList.innerHTML += `<li class="flex justify-between items-center"><span>- ${cause}:</span> <strong class="text-gray-900">${cnt}</strong></li>`;
+            });
+
+            document.getElementById('dashTransText').textContent = `Tổng cộng ${currentWeek.transCount || 0} sự cố Truyền dẫn & ${currentWeek.cmipCount || 0} sự cố thiết bị CMIP được xử lý trong tuần.`;
+            document.getElementById('dashPowerText').textContent = `Ghi nhận ${currentWeek.powerCount || 0} sự cố Nguồn điện và ${currentWeek.acCount || 0} sự cố Điều hòa nhiệt độ trạm.`;
+
+            if (fiberChartInstance && pieChartInstance) {
+                fiberChartInstance.data.datasets[0].data = [
+                    fiberCauses['Khách quan'] || 0,
+                    fiberCauses['Chủ quan'] || 0,
+                    fiberCauses['Chưa làm hết trách nhiệm'] || 0,
+                    fiberCauses['Thiên tai'] || 0,
+                    fiberCauses['Đã báo trước nguy cơ'] || 0,
+                    fiberCauses['Suy hao/Đứt sợi'] || 0
+                ];
+                fiberChartInstance.update();
+
+                pieChartInstance.data.datasets[0].data = [
+                    totalFiber,
+                    currentWeek.transCount || 0,
+                    currentWeek.cmipCount || 0,
+                    currentWeek.radioCount || 0,
+                    currentWeek.acCount || 0,
+                    currentWeek.powerCount || 0
+                ];
+                pieChartInstance.update();
+            }
+        }
+
+        // --- TAB SWITCHING ---
+        window.switchTab = function(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(el => {
+                el.classList.remove('active-tab', 'border-white', 'text-white');
+                el.classList.add('border-transparent', 'text-blue-200');
+            });
+
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            const activeNav = document.getElementById(`nav-${tabId}`);
+            activeNav.classList.add('active-tab', 'border-white', 'text-white');
+            activeNav.classList.remove('border-transparent', 'text-blue-200');
+
+            if (tabId === 'dashboard') {
+                updateDashboard();
+            }
+        };
+
+        window.handleWeekSelectChange = function() {
+            selectedWeek = document.getElementById('globalWeekSelect').value;
+            setupRealtimeListeners();
+            showToast('Đã chuyển sang dữ liệu Tuần ' + selectedWeek);
+        };
+
+        window.handleWeekPickerChange = function() {
+            showToast('Đã tải lịch làm việc tuần được chọn');
+        };
+
+        // --- TAB 2 REALTIME ACTIONS ---
+        function loadCurrentWeekToForm() {
+            const data = window.appState.currentWeek;
+            document.getElementById('generalWeekInfo').value = data.generalInfo || '';
+            document.getElementById('transCount').value = data.transCount || 0;
+            document.getElementById('cmipCount').value = data.cmipCount || 0;
+            document.getElementById('radioCount').value = data.radioCount || 0;
+            document.getElementById('acCount').value = data.acCount || 0;
+            document.getElementById('powerCount').value = data.powerCount || 0;
+            document.getElementById('tvCount').value = data.tvCount || 0;
+        }
+
+        window.saveCurrentWeekData = async function() {
+            const cause = document.getElementById('fiberCauseSelect').value;
+            const count = parseInt(document.getElementById('fiberCount').value) || 0;
+            
+            const updatedFiber = { ...(window.appState.currentWeek.fiberCauses || {}) };
+            if (count > 0) {
+                updatedFiber[cause] = (updatedFiber[cause] || 0) + count;
+                document.getElementById('fiberCount').value = '';
+            }
+
+            const updatedDoc = {
+                generalInfo: document.getElementById('generalWeekInfo').value,
+                fiberCauses: updatedFiber,
+                transCount: parseInt(document.getElementById('transCount').value) || 0,
+                cmipCount: parseInt(document.getElementById('cmipCount').value) || 0,
+                radioCount: parseInt(document.getElementById('radioCount').value) || 0,
+                acCount: parseInt(document.getElementById('acCount').value) || 0,
+                powerCount: parseInt(document.getElementById('powerCount').value) || 0,
+                tvCount: parseInt(document.getElementById('tvCount').value) || 0,
+                lastUpdatedBy: currentUser,
+                updatedAt: new Date().toISOString()
+            };
+
+            await setDoc(docPath('weekly_reports', 'week_' + selectedWeek), updatedDoc);
+            showToast('Đã lưu & đồng bộ dữ liệu tuần thành công!');
+        };
+
+        function renderFiberTable() {
+            const tbody = document.getElementById('fiberTableBody');
+            tbody.innerHTML = '';
+            const fiberCauses = window.appState.currentWeek.fiberCauses || {};
+
+            Object.entries(fiberCauses).forEach(([cause, count]) => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50';
+                tr.innerHTML = `
+                    <td class="p-3 font-medium text-gray-800">${cause}</td>
+                    <td class="p-3 text-center"><span class="px-2 py-0.5 rounded-full text-xs font-bold ${count > 0 ? 'bg-amber-100 text-amber-800' : 'bg-gray-100 text-gray-500'}">${count}</span></td>
+                    <td class="p-3 text-gray-500">${count > 0 ? 'Cần theo dõi & xử lý dứt điểm' : 'Thường xuyên rà soát'}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // --- TAB 3 REALTIME ACTIONS ---
+        window.addNextWeekTask = async function() {
+            const content = document.getElementById('nextTaskContent').value.trim();
+            const priority = document.getElementById('nextTaskPriority').value;
+            if (!content) {
+                alert('Vui lòng nhập nội dung công việc!');
+                return;
+            }
+
+            await addDoc(publicPath('next_week_tasks'), {
+                content: content,
+                priority: priority,
+                owner: currentUser,
+                createdAt: new Date().toISOString()
+            });
+
+            document.getElementById('nextTaskContent').value = '';
+            showToast('Đã thêm nhiệm vụ mới!');
+        };
+
+        window.deleteNextTask = async function(id) {
+            await deleteDoc(docPath('next_week_tasks', id));
+            showToast('Đã xóa nhiệm vụ!');
+        };
+
+        function renderNextWeekTasks() {
+            const tbody = document.getElementById('nextWeekTableBody');
+            tbody.innerHTML = '';
+            const tasks = window.appState.nextWeekTasks || [];
+
+            if (tasks.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-400">Chưa có công việc dự kiến nào trên đám mây.</td></tr>`;
+                return;
+            }
+
+            tasks.forEach((task, index) => {
+                let badgeClass = 'bg-blue-100 text-blue-800';
+                if (task.priority === 'Cao') badgeClass = 'bg-amber-100 text-amber-800';
+                if (task.priority === 'Khẩn cấp') badgeClass = 'bg-red-100 text-red-800';
+
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50';
+                tr.innerHTML = `
+                    <td class="p-3 text-center font-bold text-gray-400">${index + 1}</td>
+                    <td class="p-3 font-medium text-gray-800">${task.content}</td>
+                    <td class="p-3"><span class="px-2.5 py-1 rounded-full text-[10px] font-bold ${badgeClass}">${task.priority}</span></td>
+                    <td class="p-3 text-gray-600 font-semibold">${task.owner}</td>
+                    <td class="p-3 text-center">
+                        <button onclick="deleteNextTask('${task.id}')" class="text-red-500 hover:text-red-700 p-1" title="Xóa"><i class="fas fa-trash"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // --- TAB 4 REALTIME DOCUMENTS ACTIONS ---
+        function renderDocuments() {
+            const tbody = document.getElementById('docTableBody');
+            tbody.innerHTML = '';
+            const docs = window.appState.documents || [];
+
+            docs.forEach(docItem => {
+                let statusBadge = 'bg-blue-100 text-blue-800';
+                if (docItem.status === 'Đã hoàn thành') statusBadge = 'bg-emerald-100 text-emerald-800';
+                if (docItem.status === 'Chưa hoàn thành') statusBadge = 'bg-red-100 text-red-800';
+
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50';
+                tr.innerHTML = `
+                    <td class="p-3 font-bold text-vnpt">${docItem.num}</td>
+                    <td class="p-3 font-medium text-gray-800">${docItem.content}</td>
+                    <td class="p-3 text-gray-600">${docItem.deadline}</td>
+                    <td class="p-3 text-gray-600">${docItem.weeklyProgress || '-'}</td>
+                    <td class="p-3"><span class="px-2.5 py-1 rounded-full text-[10px] font-bold ${statusBadge}">${docItem.status}</span></td>
+                    <td class="p-3 text-gray-600">${docItem.finishDate || '-'}</td>
+                    <td class="p-3 text-center flex items-center justify-center gap-1">
+                        <button onclick="openDocModal('${docItem.id}')" class="bg-blue-50 text-vnpt hover:bg-vnpt hover:text-white px-2.5 py-1 rounded text-xs font-semibold transition">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="deleteDocItem('${docItem.id}')" class="bg-red-50 text-red-600 hover:bg-red-600 hover:text-white px-2.5 py-1 rounded text-xs font-semibold transition">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        window.openDocModal = function(docId = null) {
+            const modal = document.getElementById('docModal');
+            const form = document.getElementById('docForm');
+            form.reset();
+
+            if (docId) {
+                const docItem = window.appState.documents.find(d => d.id === docId);
+                if (docItem) {
+                    document.getElementById('docModalTitle').textContent = 'Chỉnh Sửa Văn Bản';
+                    document.getElementById('docId').value = docItem.id;
+                    document.getElementById('docNum').value = docItem.num;
+                    document.getElementById('docDeadline').value = docItem.deadline;
+                    document.getElementById('docContent').value = docItem.content;
+                    document.getElementById('docWeeklyProgress').value = docItem.weeklyProgress || '';
+                    document.getElementById('docStatus').value = docItem.status;
+                    document.getElementById('docFinishDate').value = docItem.finishDate || '';
+                }
+            } else {
+                document.getElementById('docModalTitle').textContent = 'Thêm Văn Bản Mới';
+                document.getElementById('docId').value = '';
+            }
+
+            modal.classList.remove('hidden');
+        };
+
+        window.closeDocModal = function() {
+            document.getElementById('docModal').classList.add('hidden');
+        };
+
+        window.handleDocSubmit = async function(e) {
+            e.preventDefault();
+            const id = document.getElementById('docId').value;
+            const docData = {
+                num: document.getElementById('docNum').value,
+                deadline: document.getElementById('docDeadline').value,
+                content: document.getElementById('docContent').value,
+                weeklyProgress: document.getElementById('docWeeklyProgress').value,
+                status: document.getElementById('docStatus').value,
+                finishDate: document.getElementById('docFinishDate').value,
+                updatedBy: currentUser,
+                updatedAt: new Date().toISOString()
+            };
+
+            if (id) {
+                await setDoc(docPath('documents', id), docData, { merge: true });
+                showToast('Đã cập nhật văn bản!');
+            } else {
+                await addDoc(publicPath('documents'), docData);
+                showToast('Đã thêm văn bản mới!');
+            }
+
+            closeDocModal();
+        };
+
+        window.deleteDocItem = async function(id) {
+            await deleteDoc(docPath('documents', id));
+            showToast('Đã xóa văn bản!');
+        };
+
+        // --- EXPORT TO EXCEL ---
+        window.exportToExcel = function() {
+            const wb = XLSX.utils.book_new();
+            const currentWeek = window.appState.currentWeek || {};
+            const fiberCauses = currentWeek.fiberCauses || {};
+
+            const currentWeekData = [
+                ['BÁO CÁO TỔNG HỢP SỰ CỐ KỸ THUẬT - VNPT NGHỆ AN'],
+                ['Tuần:', selectedWeek],
+                [],
+                ['Hạng mục sự cố', 'Số lượng / Chi tiết'],
+                ['Sự cố Cáp quang - Do khách quan', fiberCauses['Khách quan'] || 0],
+                ['Sự cố Cáp quang - Do chủ quan', fiberCauses['Chủ quan'] || 0],
+                ['Sự cố Cáp quang - Do chưa làm hết trách nhiệm', fiberCauses['Chưa làm hết trách nhiệm'] || 0],
+                ['Sự cố Cáp quang - Do thiên tai', fiberCauses['Thiên tai'] || 0],
+                ['Sự cố Cáp quang - Đã báo trước nguy cơ', fiberCauses['Đã báo trước nguy cơ'] || 0],
+                ['Sự cố Cáp quang - Do suy hao/đứt sợi', fiberCauses['Suy hao/Đứt sợi'] || 0],
+                ['Sự cố Thiết bị Truyền dẫn', currentWeek.transCount || 0],
+                ['Sự cố Thiết bị CMIP', currentWeek.cmipCount || 0],
+                ['Sự cố Thiết bị Vô tuyến', currentWeek.radioCount || 0],
+                ['Sự cố Điều hòa', currentWeek.acCount || 0],
+                ['Sự cố Nguồn điện', currentWeek.powerCount || 0],
+                ['Tổng số phiên Truyền hình', currentWeek.tvCount || 0]
+            ];
+            const ws1 = XLSX.utils.aoa_to_sheet(currentWeekData);
+            XLSX.utils.book_append_sheet(wb, ws1, "SuCoTuan");
+
+            const docData = [
+                ['Số văn bản', 'Nội dung văn bản', 'Hạn hoàn thành', 'Thực hiện trong tuần', 'Tiến độ', 'Ngày hoàn thành'],
+                ...(window.appState.documents || []).map(d => [d.num, d.content, d.deadline, d.weeklyProgress, d.status, d.finishDate])
+            ];
+            const ws2 = XLSX.utils.aoa_to_sheet(docData);
+            XLSX.utils.book_append_sheet(wb, ws2, "TheoDoiVanBan");
+
+            XLSX.writeFile(wb, `BaoCao_VNPT_Tuan_${selectedWeek}.xlsx`);
+            showToast('Đã xuất file Excel thành công!');
+        };
+    </script>
+</body>
+</html>
