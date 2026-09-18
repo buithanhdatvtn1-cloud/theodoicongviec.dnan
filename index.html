@@ -323,12 +323,30 @@
                         </div>
                     </div>
 
-                    <!-- Ô Cập nhật thông tin chung -->
-                    <div>
-                        <label class="block text-xs font-bold text-gray-700 uppercase mb-2">
-                            <i class="fas fa-edit text-vnpt mr-1"></i> Ô cập nhật các thông tin chung trong tuần
+                    <!-- Ô Cập nhật thông tin chung (Có thể nhấn Enter xuống dòng, Lưu, Sửa, Xóa) -->
+                    <div class="bg-blue-50/50 p-4 rounded-xl border border-blue-100 space-y-3">
+                        <label class="block text-xs font-bold text-gray-700 uppercase">
+                            <i class="fas fa-edit text-vnpt mr-1"></i> Các Thông Tin Chung Trong Tuần
                         </label>
-                        <textarea id="generalWeekInfo" rows="3" class="w-full p-3 border border-gray-300 rounded-xl text-xs focus:ring-2 focus:ring-vnpt focus:border-vnpt" placeholder="Nhập các thông tin chỉ đạo, lưu ý hoặc tình hình chung trong tuần..."></textarea>
+                        
+                        <!-- Area Thêm / Chỉnh sửa nội dung -->
+                        <div class="space-y-2">
+                            <input type="hidden" id="editingGeneralInfoId" value="">
+                            <textarea id="generalWeekInfoInput" rows="3" class="w-full p-3 bg-white border border-gray-300 rounded-xl text-xs focus:ring-2 focus:ring-vnpt focus:border-vnpt" placeholder="Nhập chỉ đạo, lưu ý hoặc tình hình chung... (Bấm Enter để xuống dòng)"></textarea>
+                            <div class="flex justify-end gap-2">
+                                <button type="button" id="cancelEditGeneralBtn" onclick="cancelEditGeneralInfo()" class="hidden px-3 py-1.5 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg text-xs font-semibold transition">
+                                    Hủy Sửa
+                                </button>
+                                <button type="button" onclick="saveGeneralInfoItem()" class="px-4 py-1.5 bg-vnpt hover:bg-vnpt-dark text-white rounded-lg text-xs font-semibold shadow flex items-center gap-1.5 transition">
+                                    <i class="fas fa-paper-plane"></i> <span id="saveGeneralBtnText">Lưu Thông Tin</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Danh sách các ghi chú/thông tin chung đã lưu -->
+                        <div id="generalInfoList" class="space-y-2 mt-3">
+                            <!-- Render bằng JavaScript -->
+                        </div>
                     </div>
 
                     <!-- Form nhập sự cố -->
@@ -383,27 +401,6 @@
                             <button onclick="saveCurrentWeekData()" class="bg-vnpt hover:bg-vnpt-dark text-white px-5 py-2 rounded-lg text-xs font-bold shadow flex items-center gap-2">
                                 <i class="fas fa-save"></i> Lưu Cập Nhật Tuần
                             </button>
-                        </div>
-                    </div>
-
-                    <!-- Bảng tổng hợp sự cố cáp quang chi tiết -->
-                    <div>
-                        <h3 class="text-sm font-bold text-gray-800 mb-3 flex items-center gap-2">
-                            <i class="fas fa-list-alt text-vnpt"></i> Bảng Tổng Hợp Chi Tiết Sự Cố Cáp Quang Trong Tuần
-                        </h3>
-                        <div class="overflow-x-auto rounded-xl border border-gray-200">
-                            <table class="w-full text-xs text-left text-gray-600">
-                                <thead class="bg-gray-100 text-gray-700 font-bold uppercase border-b">
-                                    <tr>
-                                        <th class="p-3">Nguyên nhân sự cố Cáp quang</th>
-                                        <th class="p-3 text-center">Số lượng</th>
-                                        <th class="p-3">Ghi chú / Đánh giá</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="fiberTableBody" class="divide-y divide-gray-100">
-                                    <!-- Populated JS -->
-                                </tbody>
-                            </table>
                         </div>
                     </div>
                 </div>
@@ -563,7 +560,6 @@
 
     <!-- JAVASCRIPT APP LOGIC WITH REAL-TIME CLOUD SYNC -->
     <script>
-        // 🔗 ĐÃ CẬP NHẬT ĐƯỜNG DẪN GOOGLE APPS SCRIPT WEB APP
         const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxccyDnHvYshw2lW429ldXQLH8AVKnjmhcqF2MeKXWuCwQWz2IKl5pihA-b4-Dy4Cqz/exec'; 
 
         const VALID_USERS = [
@@ -577,7 +573,7 @@
 
         let db = {
             currentWeek: {
-                generalInfo: "",
+                generalInfoList: [], // Danh sách ghi chú thông tin chung
                 fiberCauses: { 'Khách quan': 0, 'Chủ quan': 0, 'Chưa làm hết trách nhiệm': 0, 'Thiên tai': 0, 'Đã báo trước nguy cơ': 0, 'Suy hao/Đứt sợi': 0 },
                 transCount: 0, cmipCount: 0, radioCount: 0, acCount: 0, powerCount: 0, tvCount: 0
             },
@@ -590,7 +586,6 @@
 
         // --- CÁC HÀM GỌI API ĐỒNG BỘ DATA REAL-TIME ---
         
-        // 1. Tải dữ liệu từ Google Sheets
         async function fetchCloudData() {
             if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL.includes('AKfycb...')) return;
             try {
@@ -598,9 +593,15 @@
                 const data = await res.json();
                 if (data) {
                     db = data;
+                    if (!db.currentWeek.generalInfoList) {
+                        db.currentWeek.generalInfoList = [];
+                        if (db.currentWeek.generalInfo) {
+                            db.currentWeek.generalInfoList.push({ id: Date.now(), text: db.currentWeek.generalInfo });
+                        }
+                    }
                     updateDashboard();
                     loadCurrentWeekToForm();
-                    renderFiberTable();
+                    renderGeneralInfoList();
                     renderNextWeekTasks();
                     renderDocuments();
                 }
@@ -609,19 +610,16 @@
             }
         }
 
-        // 2. Tự động làm mới dữ liệu mỗi 8 giây (Giúp nhiều máy/điện thoại thấy thay đổi cùng lúc)
         setInterval(fetchCloudData, 8000);
 
-        // 3. Gửi dữ liệu cập nhật lên Đám mây
         async function postCloudData(action, payload) {
             try {
                 await fetch(APPS_SCRIPT_URL, {
                     method: 'POST',
-                    mode: 'no-cors', // Cần thiết đối với Google Apps Script POST
+                    mode: 'no-cors',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action, payload })
                 });
-                // Tải lại dữ liệu sau 1 giây để cập nhật chính xác
                 setTimeout(fetchCloudData, 1000);
             } catch (err) {
                 console.error("Lỗi khi gửi dữ liệu:", err);
@@ -666,7 +664,7 @@
             document.getElementById('userAvatar').textContent = currentUser.charAt(0).toUpperCase();
 
             initCharts();
-            fetchCloudData(); // Đọc dữ liệu từ Google Sheets ngay khi đăng nhập
+            fetchCloudData();
         }
 
         // --- NAVIGATION ---
@@ -689,7 +687,6 @@
 
         // --- TAB 2: CURRENT WEEK LOGIC ---
         function loadCurrentWeekToForm() {
-            document.getElementById('generalWeekInfo').value = db.currentWeek.generalInfo || '';
             document.getElementById('transCount').value = db.currentWeek.transCount || 0;
             document.getElementById('cmipCount').value = db.currentWeek.cmipCount || 0;
             document.getElementById('radioCount').value = db.currentWeek.radioCount || 0;
@@ -698,9 +695,93 @@
             document.getElementById('tvCount').value = db.currentWeek.tvCount || 0;
         }
 
+        // Quản lý thông tin chung (Xuống dòng bằng Enter, Lưu, Sửa, Xóa)
+        async function saveGeneralInfoItem() {
+            const text = document.getElementById('generalWeekInfoInput').value.trim();
+            const editId = document.getElementById('editingGeneralInfoId').value;
+
+            if (!text) {
+                alert('Vui lòng nhập nội dung thông tin chung!');
+                return;
+            }
+
+            if (!db.currentWeek.generalInfoList) {
+                db.currentWeek.generalInfoList = [];
+            }
+
+            if (editId) {
+                const item = db.currentWeek.generalInfoList.find(i => i.id == editId);
+                if (item) {
+                    item.text = text;
+                }
+            } else {
+                db.currentWeek.generalInfoList.push({
+                    id: Date.now(),
+                    text: text
+                });
+            }
+
+            cancelEditGeneralInfo();
+            renderGeneralInfoList();
+            await postCloudData('saveCurrentWeek', db.currentWeek);
+        }
+
+        function editGeneralInfoItem(id) {
+            const item = db.currentWeek.generalInfoList.find(i => i.id == id);
+            if (item) {
+                document.getElementById('editingGeneralInfoId').value = item.id;
+                document.getElementById('generalWeekInfoInput').value = item.text;
+                document.getElementById('saveGeneralBtnText').textContent = 'Cập Nhật';
+                document.getElementById('cancelEditGeneralBtn').classList.remove('hidden');
+            }
+        }
+
+        async function deleteGeneralInfoItem(id) {
+            if (confirm('Bạn có chắc chắn muốn xóa thông tin chung này?')) {
+                db.currentWeek.generalInfoList = db.currentWeek.generalInfoList.filter(i => i.id != id);
+                renderGeneralInfoList();
+                await postCloudData('saveCurrentWeek', db.currentWeek);
+            }
+        }
+
+        function cancelEditGeneralInfo() {
+            document.getElementById('editingGeneralInfoId').value = '';
+            document.getElementById('generalWeekInfoInput').value = '';
+            document.getElementById('saveGeneralBtnText').textContent = 'Lưu Thông Tin';
+            document.getElementById('cancelEditGeneralBtn').classList.add('hidden');
+        }
+
+        function renderGeneralInfoList() {
+            const listEl = document.getElementById('generalInfoList');
+            listEl.innerHTML = '';
+
+            if (!db.currentWeek.generalInfoList || db.currentWeek.generalInfoList.length === 0) {
+                listEl.innerHTML = `<p class="text-xs text-gray-400 italic">Chưa có thông tin chung nào được cập nhật.</p>`;
+                return;
+            }
+
+            db.currentWeek.generalInfoList.forEach((item, idx) => {
+                const formattedText = item.text.replace(/\n/g, '<br>');
+                const div = document.createElement('div');
+                div.className = 'bg-white p-3 rounded-lg border border-blue-100 shadow-sm flex items-start justify-between gap-3';
+                div.innerHTML = `
+                    <div class="text-xs text-gray-800 leading-relaxed font-normal flex-grow">
+                        <span class="font-semibold text-vnpt mr-1">#${idx + 1}:</span> ${formattedText}
+                    </div>
+                    <div class="flex items-center gap-1.5 shrink-0">
+                        <button onclick="editGeneralInfoItem(${item.id})" title="Chỉnh sửa" class="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50 transition">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="deleteGeneralInfoItem(${item.id})" title="Xóa" class="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50 transition">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                listEl.appendChild(div);
+            });
+        }
+
         async function saveCurrentWeekData() {
-            db.currentWeek.generalInfo = document.getElementById('generalWeekInfo').value;
-            
             const cause = document.getElementById('fiberCauseSelect').value;
             const count = parseInt(document.getElementById('fiberCount').value) || 0;
             if (count > 0) {
@@ -715,30 +796,10 @@
             db.currentWeek.powerCount = parseInt(document.getElementById('powerCount').value) || 0;
             db.currentWeek.tvCount = parseInt(document.getElementById('tvCount').value) || 0;
 
-            renderFiberTable();
             updateDashboard();
 
-            // Lưu dữ liệu lên Đám mây Google Sheets
             await postCloudData('saveCurrentWeek', db.currentWeek);
             alert('Đã đồng bộ cập nhật lên Đám Mây hệ thống!');
-        }
-
-        function renderFiberTable() {
-            const tbody = document.getElementById('fiberTableBody');
-            tbody.innerHTML = '';
-
-            if (!db.currentWeek.fiberCauses) return;
-
-            Object.entries(db.currentWeek.fiberCauses).forEach(([cause, count]) => {
-                const tr = document.createElement('tr');
-                tr.className = 'hover:bg-slate-50';
-                tr.innerHTML = `
-                    <td class="p-3 font-medium text-gray-800">${cause}</td>
-                    <td class="p-3 text-center"><span class="px-2 py-0.5 rounded-full text-xs font-bold ${count > 0 ? 'bg-amber-100 text-amber-800' : 'bg-gray-100 text-gray-500'}">${count}</span></td>
-                    <td class="p-3 text-gray-500">${count > 0 ? 'Cần theo dõi & xử lý dứt điểm' : 'Thường xuyên rà soát'}</td>
-                `;
-                tbody.appendChild(tr);
-            });
         }
 
         function loadWeekData() {
@@ -765,7 +826,6 @@
             document.getElementById('nextTaskContent').value = '';
             renderNextWeekTasks();
 
-            // Đồng bộ lên Google Sheets
             await postCloudData('addNextTask', newTask);
         }
 
@@ -773,7 +833,6 @@
             db.nextWeekTasks = db.nextWeekTasks.filter(t => t.id !== id);
             renderNextWeekTasks();
 
-            // Xóa trên Google Sheets
             await postCloudData('deleteNextTask', { id: id });
         }
 
@@ -889,7 +948,6 @@
             closeDocModal();
             renderDocuments();
 
-            // Đồng bộ lên Cloud Google Sheets
             await postCloudData('saveDocument', docData);
         }
 
